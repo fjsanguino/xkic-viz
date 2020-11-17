@@ -1,28 +1,59 @@
 <template>
-  <div id="container">
-    <ChangeLayer_button id="menu"/>
-    <MapboxMap id="map"/>
-  </div>
+  <div id="app">
+    <el-container class="container">
+      <el-aside width="210px">
+        <Sidebar/>
+      </el-aside>
 
+      <el-container>
+
+
+        <el-main>
+
+          <MapboxMap id="map"/>
+
+
+        </el-main>
+      </el-container>
+    </el-container>
+  </div>
 </template>
 
+
 <script>
+
+import Sidebar from "./components/Sidebar";
 import MapboxMap from "@/components/MapBox.vue";
-import ChangeLayer_button from "@/components/Button";
+
 
 export default {
+  name: "App",
 
-  name: 'app',
   components: {
-    ChangeLayer_button,
-    MapboxMap
-  }
-}
+    MapboxMap,
+    Sidebar,
+  },
+};
+
 </script>
 
 <style>
-#menu {
-  z-index: 10;
+html,
+body,
+.container {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  color: #2c3e50;
+  height: 100%;
 }
 
 </style>

@@ -16,28 +16,21 @@ export default {
         type: Object,
         required: true
       },
-      shown_layer: 'SC_NDVI'
     };
   },
   mounted() {
     // create the map after the component is mounted
     this.createMap();
 
-    this.$root.$on('change_layer', () => {
-
-      console.log('UN mensaje muy muy muy muy largo')
+    this.$root.$on('change_layer', (layer_id) => {
 
       this.map.setLayoutProperty('SC_NDVI', 'visibility', 'none');
       this.map.setLayoutProperty('SC_GSI', 'visibility', 'none');
+      this.map.setLayoutProperty('SC_GSD', 'visibility', 'none');
+      this.map.setLayoutProperty('SC_GSBS', 'visibility', 'none');
+      this.map.setLayoutProperty('SC_PI', 'visibility', 'none');
 
-      if (this.shown_layer === 'SC_NDVI') {
-        this.map.setLayoutProperty('SC_GSI', 'visibility', 'visible');
-        this.shown_layer = 'SC_GSI';
-      } else if (this.shown_layer === 'SC_GSI') {
-        this.map.setLayoutProperty('SC_NDVI', 'visibility', 'visible');
-        this.shown_layer = 'SC_NDVI';
-      }
-      console.log(this.shown_layer);
+      this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
     });
 
 
@@ -64,14 +57,14 @@ export default {
 
       var hoveredStateId = null;
 
-      let json_data = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/indexes.json'));
+      let json_data = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/indexes_censal.json'));
 
       // set mapbox event listeners to update Vue component data
       vm.map.on('load', function () {
         // Add a source for the state polygons.
         vm.map.addSource('ZonasCensales', {
           'type': 'geojson',
-          'data': 'https://raw.githubusercontent.com/cmaro2/cross-kic/master/indexes.json',
+          'data': 'https://raw.githubusercontent.com/cmaro2/cross-kic/master/indexes_censal.json',
           'generateId': true
         });
 
@@ -126,6 +119,84 @@ export default {
             'fill-opacity': 0.6
           }
         }, 'waterway-label');
+
+        let GSDvals = json_data.features.map(f => f.properties.GSDensity);
+        let minGSD = Math.min(...GSDvals);
+        let maxGSD = Math.max(...GSDvals);
+
+        vm.map.addLayer({
+          'id': 'SC_GSD',
+          'type': 'fill',
+          'source': 'ZonasCensales',
+          'layout': {
+            'visibility': 'none'
+          },
+          'paint': {
+            'fill-color':
+                ['case',
+                  ['!=', ['get', 'GSDensity'], null],
+                  ['interpolate', ['linear'], ['get', 'GSDensity'], minGSD, 'rgba(222,235,247,1)', maxGSD, 'rgba(49,130,189,1)'],
+                  'rgba(255, 255, 255, 0)'],
+            'fill-outline-color':
+                ['case',
+                  ['boolean', ['feature-state', 'hover'], false],
+                  'rgba(0, 0, 0, 1)',
+                  'rgba(255, 255, 255, 0)'],
+            'fill-opacity': 0.6
+          }
+        }, 'waterway-label');
+
+        let GSBSvals = json_data.features.map(f => f.properties.GSBSRatio);
+        let minGSBS = Math.min(...GSBSvals);
+        let maxGSBS = Math.max(...GSBSvals);
+
+        vm.map.addLayer({
+          'id': 'SC_GSBS',
+          'type': 'fill',
+          'source': 'ZonasCensales',
+          'layout': {
+            'visibility': 'none'
+          },
+          'paint': {
+            'fill-color':
+                ['case',
+                  ['!=', ['get', 'GSBSRatio'], null],
+                  ['interpolate', ['linear'], ['get', 'GSBSRatio'], minGSBS, 'rgba(222,235,247,1)', maxGSBS, 'rgba(49,130,189,1)'],
+                  'rgba(255, 255, 255, 0)'],
+            'fill-outline-color':
+                ['case',
+                  ['boolean', ['feature-state', 'hover'], false],
+                  'rgba(0, 0, 0, 1)',
+                  'rgba(255, 255, 255, 0)'],
+            'fill-opacity': 0.6
+          }
+        }, 'waterway-label');
+
+        let PIvals = json_data.features.map(f => f.properties.prox_avg);
+        let minPI = Math.min(...PIvals);
+        let maxPI = Math.max(...PIvals);
+
+        vm.map.addLayer({
+          'id': 'SC_PI',
+          'type': 'fill',
+          'source': 'ZonasCensales',
+          'layout': {
+            'visibility': 'none'
+          },
+          'paint': {
+            'fill-color':
+                ['case',
+                  ['!=', ['get', 'prox_avg'], null],
+                  ['interpolate', ['linear'], ['get', 'prox_avg'], minPI, 'rgba(222,235,247,1)', maxPI, 'rgba(49,130,189,1)'],
+                  'rgba(255, 255, 255, 0)'],
+            'fill-outline-color':
+                ['case',
+                  ['boolean', ['feature-state', 'hover'], false],
+                  'rgba(0, 0, 0, 1)',
+                  'rgba(255, 255, 255, 0)'],
+            'fill-opacity': 0.6
+          }
+        }, 'waterway-label');
       });
 
       this.map.on('mousemove', function (e) {
@@ -157,6 +228,15 @@ export default {
         } else if (f[0].layer.id === 'SC_GSI') {
           str_index = 'Green Space Index';
           val_index = f[0].properties.GSIndex;
+        } else if (f[0].layer.id === 'SC_GSD') {
+          str_index = 'Green Space Density';
+          val_index = f[0].properties.GSDensity;
+        }else if (f[0].layer.id === 'SC_GSBS') {
+          str_index = 'Green Space vs Built Space Ratio';
+          val_index = f[0].properties.GSBSRatio;
+        }else if (f[0].layer.id === 'SC_PI') {
+          str_index = 'Proximity Index';
+          val_index = f[0].properties.prox_avg;
         }
 
         new mapboxgl.Popup()
@@ -171,6 +251,15 @@ export default {
         vm.map.getCanvas().style.cursor = 'pointer';
       });
       vm.map.on('mouseenter', 'SC_GSI', function () {
+        vm.map.getCanvas().style.cursor = 'pointer';
+      });
+      vm.map.on('mouseenter', 'SC_GSD', function () {
+        vm.map.getCanvas().style.cursor = 'pointer';
+      });
+      vm.map.on('mouseenter', 'SC_GSBS', function () {
+        vm.map.getCanvas().style.cursor = 'pointer';
+      });
+      vm.map.on('mouseenter', 'SC_PI', function () {
         vm.map.getCanvas().style.cursor = 'pointer';
       });
 
@@ -196,9 +285,36 @@ export default {
           );
         }
       });
-      //map.on('foo', function() { alert('bar'); })
-      //map.fire('foo');
+      vm.map.on('mouseleave', 'SC_GSD', function () {
+        vm.map.getCanvas().style.cursor = '';
 
+        if (hoveredStateId) {
+          vm.map.setFeatureState(
+              {source: 'ZonasCensales', id: hoveredStateId},
+              {hover: false}
+          );
+        }
+      });
+      vm.map.on('mouseleave', 'SC_GSBS', function () {
+        vm.map.getCanvas().style.cursor = '';
+
+        if (hoveredStateId) {
+          vm.map.setFeatureState(
+              {source: 'ZonasCensales', id: hoveredStateId},
+              {hover: false}
+          );
+        }
+      });
+      vm.map.on('mouseleave', 'SC_PI', function () {
+        vm.map.getCanvas().style.cursor = '';
+
+        if (hoveredStateId) {
+          vm.map.setFeatureState(
+              {source: 'ZonasCensales', id: hoveredStateId},
+              {hover: false}
+          );
+        }
+      });
     }
   },
   // eslint-disable-next-line vue/require-render-return
