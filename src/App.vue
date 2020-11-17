@@ -1,28 +1,28 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="container">
+    <ChangeLayer_button id="menu"/>
+    <MapboxMap id="map"/>
   </div>
+
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import MapboxMap from "@/components/MapBox.vue";
+import ChangeLayer_button from "@/components/Button";
 
 export default {
-  name: 'App',
+
+  name: 'app',
   components: {
-    HelloWorld
+    ChangeLayer_button,
+    MapboxMap
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+#menu {
+  z-index: 10;
 }
+
 </style>
