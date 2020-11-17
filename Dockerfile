@@ -1,5 +1,4 @@
 FROM node:latest as build-stage
-RUN npm config set registry="http://registry.npmjs.org/"
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
