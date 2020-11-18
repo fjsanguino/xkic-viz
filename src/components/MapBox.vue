@@ -246,6 +246,7 @@ export default {
             .addTo(vm.map);
       });
 
+
       // Change the cursor to a pointer when the mouse is over the states layer.
       vm.map.on('mouseenter', 'SC_NDVI', function () {
         vm.map.getCanvas().style.cursor = 'pointer';
