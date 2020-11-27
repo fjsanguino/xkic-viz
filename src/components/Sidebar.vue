@@ -17,6 +17,23 @@
     <el-submenu index="3">
       <template slot="title">
         <i class="el-icon-location"></i>
+        <span>Agrupación</span>
+      </template>
+
+
+      <el-menu-item-group>
+        <el-radio-group v-model="checkboxGroupIndAgrupacion" @input=manageAgrupation()>
+          <el-radio-button class='radio-group-menu' label="SC_barrios">Barrio</el-radio-button>
+          <el-radio-button class='radio-group-menu' label="SC_distritos">Distrito</el-radio-button>
+          <el-radio-button class='radio-group-menu' label="none">Nada</el-radio-button>
+        </el-radio-group>
+      </el-menu-item-group>
+    </el-submenu>
+
+
+    <el-submenu index="3">
+      <template slot="title">
+        <i class="el-icon-location"></i>
         <span>Layers</span>
       </template>
 
@@ -24,23 +41,23 @@
       <el-menu-item-group title="Green Space">
         <el-radio-group v-model="checkboxGroupInd">
           <el-menu-item index="1-1">
-            <el-radio class='radio-group-menu' label="SC_NDVI" name="SC_NDVI" @change="manageSelector()" >
+            <el-radio class='radio-group-menu' label="SC_NDVI" name="SC_NDVI" @input="manageSelector()">
               NDVI
             </el-radio>
           </el-menu-item>
 
-          <el-menu-item index="1-2" >
-            <el-radio class='radio-group-menu' label="SC_GSI" name="SC_GSI" @change="manageSelector()">
+          <el-menu-item index="1-2">
+            <el-radio class='radio-group-menu' label="SC_GSI" name="SC_GSI" @input="manageSelector()">
               Green Space Index
             </el-radio>
           </el-menu-item>
           <el-menu-item index="1-3">
-            <el-radio class='radio-group-menu' label="SC_GSD" name="SC_GSD" @change="manageSelector()">
+            <el-radio class='radio-group-menu' label="SC_GSD" name="SC_GSD" @input="manageSelector()">
               Green Space Density
             </el-radio>
           </el-menu-item>
           <el-menu-item index="1-4">
-            <el-radio class='radio-group-menu' label="SC_GSBS"  name="SC_GSBS" @change="manageSelector()">
+            <el-radio class='radio-group-menu' label="SC_GSBS" name="SC_GSBS" @change="manageSelector()">
               GS Built-Space Ratio
             </el-radio>
           </el-menu-item>
@@ -67,8 +84,6 @@
     -->
 
 
-
-
   </el-menu>
 
 
@@ -79,6 +94,7 @@ export default {
   data() {
     return {
       checkboxGroupInd: 'SC_NDVI',
+      checkboxGroupIndAgrupacion: 'none'
     }
   },
   methods: {
@@ -89,8 +105,12 @@ export default {
       console.log(key, keyPath);
     },
     manageSelector() {
-      this.$root.$emit('change_layer',(this.checkboxGroupInd));
+      this.$root.$emit('change_layer', (this.checkboxGroupInd));
     },
+    manageAgrupation() {
+      console.log('hey')
+      this.$root.$emit('change_layer_agrupation', (this.checkboxGroupIndAgrupacion));
+    }
 
   }
 };
