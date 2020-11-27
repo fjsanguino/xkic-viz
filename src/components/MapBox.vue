@@ -16,6 +16,9 @@ export default {
         type: Object,
         required: true
       },
+      indexLayers: ['SC_NDVI', 'SC_GSI', 'SC_GSD', 'SC_GSBS', 'SC_PI'],
+      agrupationLayers: ['SC_barrios', 'SC_distritos'],
+      fillAgrupationLayers: ['SC_barrios_fill', 'SC_distritos_fill']
     };
   },
   mounted() {
@@ -31,6 +34,15 @@ export default {
       this.map.setLayoutProperty('SC_PI', 'visibility', 'none');
 
       this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
+    });
+    this.$root.$on('change_layer_agrupation', (layer_id) => {
+
+      this.map.setLayoutProperty('SC_barrios', 'visibility', 'none');
+      this.map.setLayoutProperty('SC_distritos', 'visibility', 'none');
+
+      if (this.agrupationLayers.includes(layer_id)) {
+        this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
+      }
     });
 
 
@@ -57,16 +69,26 @@ export default {
 
       var hoveredStateId = null;
 
-      let json_data = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/indexes_censal.json'));
+      let json_data = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json'));
 
       // set mapbox event listeners to update Vue component data
       vm.map.on('load', function () {
         // Add a source for the state polygons.
         vm.map.addSource('ZonasCensales', {
           'type': 'geojson',
-          'data': 'https://raw.githubusercontent.com/cmaro2/cross-kic/master/indexes_censal.json',
+          'data': 'https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json',
           'generateId': true
         });
+
+        vm.map.addSource('Distritos', {
+          'type': 'geojson',
+          'data': 'https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesDistritos.json'
+        })
+
+        vm.map.addSource('Barrios', {
+          'type': 'geojson',
+          'data': 'https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesBarrios.json'
+        })
 
         let NDVIvals = json_data.features.map(f => f.properties.NDVI);
         let minNDVI = Math.min(...NDVIvals);
@@ -197,6 +219,54 @@ export default {
             'fill-opacity': 0.6
           }
         }, 'waterway-label');
+
+        vm.map.addLayer({
+          'id': 'SC_distritos',
+          'type': 'line',
+          'source': 'Distritos',
+          'layout': {
+            'visibility': 'none'
+          },
+          'paint': {
+            'line-opacity': 0.75,
+            'line-width': 2
+          }
+        });
+        vm.map.addLayer({
+          'id': 'SC_distritos_fill',
+          'type': 'fill',
+          'source': 'Distritos',
+          'layout': {
+            'visibility': 'visible'
+          },
+          'paint': {
+            'fill-opacity': 0,
+          }
+        });
+
+        vm.map.addLayer({
+          'id': 'SC_barrios',
+          'type': 'line',
+          'source': 'Barrios',
+          'layout': {
+            'visibility': 'none'
+          },
+          'paint': {
+            'line-opacity': 0.75,
+            'line-width': 1.25
+          }
+        });
+        vm.map.addLayer({
+          'id': 'SC_barrios_fill',
+          'type': 'fill',
+          'source': 'Barrios',
+          'layout': {
+            'visibility': 'visible'
+          },
+          'paint':{
+            'fill-opacity': 0
+          }
+        });
       });
 
       this.map.on('mousemove', function (e) {
@@ -209,41 +279,70 @@ export default {
                 {hover: false}
             );
           }
-          hoveredStateId = f[0].id;
-          vm.map.setFeatureState(
-              {source: 'ZonasCensales', id: hoveredStateId},
-              {hover: true}
-          );
+
+          for (var i = 0; i < f.length; i++) {
+            if (vm.indexLayers.includes(f[i].layer.id)) {
+              hoveredStateId = f[i].id;
+              vm.map.setFeatureState(
+                  {source: 'ZonasCensales', id: hoveredStateId},
+                  {hover: true}
+              );
+            }
+          }
         }
       });
 
       // location of the click, with description HTML from its properties.
       vm.map.on('click', function (e) {
         let f = vm.map.queryRenderedFeatures(e.point);
-        var str_index;
-        var val_index;
-        if (f[0].layer.id === 'SC_NDVI') {
-          str_index = 'NDVI';
-          val_index = f[0].properties.NDVI;
-        } else if (f[0].layer.id === 'SC_GSI') {
-          str_index = 'Green Space Index';
-          val_index = f[0].properties.GSIndex;
-        } else if (f[0].layer.id === 'SC_GSD') {
-          str_index = 'Green Space Density';
-          val_index = f[0].properties.GSDensity;
-        }else if (f[0].layer.id === 'SC_GSBS') {
-          str_index = 'Green Space vs Built Space Ratio';
-          val_index = f[0].properties.GSBSRatio;
-        }else if (f[0].layer.id === 'SC_PI') {
-          str_index = 'Proximity Index';
-          val_index = f[0].properties.prox_avg;
+        var i;
+
+        for (i = 0; i < f.length; i++) {
+          if (vm.fillAgrupationLayers.includes(f[i].layer.id)) {
+            if (f[i].layer.id === 'SC_barrios_fill') {
+              // eslint-disable-next-line no-unused-vars
+              var name_barrio = f[i].properties.Name;
+              // eslint-disable-next-line no-unused-vars
+              var code_barrio = f[i].properties.GEOCODIGO;
+            } else if (f[i].layer.id === 'SC_distritos_fill') {
+              // eslint-disable-next-line no-unused-vars
+              var name_distrito = f[i].properties.Name;
+              // eslint-disable-next-line no-unused-vars
+              var code_distrito = f[i].properties.CDIS;
+            }
+          }
         }
 
-        new mapboxgl.Popup()
-            .setLngLat(e.lngLat)
-            .setHTML('<strong> CUSEC: ' + f[0].properties.CUSEC + '</strong>' +
-                '<p>El ' + str_index + ' de la zona es ' + val_index.toFixed(2) + '</p>')
-            .addTo(vm.map);
+        for (i = 0; i < f.length; i++) {
+          if (vm.indexLayers.includes(f[i].layer.id)) {
+            var str_index;
+            var val_index;
+            if (f[i].layer.id === 'SC_NDVI') {
+              str_index = 'NDVI';
+              val_index = f[i].properties.NDVI;
+            } else if (f[i].layer.id === 'SC_GSI') {
+              str_index = 'Green Space Index';
+              val_index = f[i].properties.GSIndex;
+            } else if (f[i].layer.id === 'SC_GSD') {
+              str_index = 'Green Space Density';
+              val_index = f[i].properties.GSDensity;
+            } else if (f[i].layer.id === 'SC_GSBS') {
+              str_index = 'Green Space vs Built Space Ratio';
+              val_index = f[i].properties.GSBSRatio;
+            } else if (f[i].layer.id === 'SC_PI') {
+              str_index = 'Proximity Index';
+              val_index = f[i].properties.prox_avg;
+            }
+
+            new mapboxgl.Popup()
+                .setLngLat(e.lngLat)
+                .setHTML('<p><strong> Distrito ' + code_distrito + ': </strong>' + name_distrito + '</p>' +
+                    '<p><strong> Barrio ' + code_barrio + ': </strong>' + name_barrio + '</p>' +
+                    '<strong> CUSEC: ' + f[i].properties.CUSEC + '</strong>' +
+                    '<p>El ' + str_index + ' de la zona es ' + val_index.toFixed(2) + '</p>')
+                .addTo(vm.map);
+          }
+        }
       });
 
 
