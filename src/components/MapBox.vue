@@ -54,23 +54,49 @@ export default {
         Httpreq.send(null);
         return Httpreq.responseText;
       }
+      
+      function filterOutliers(someArray) {
+
+          if(someArray.length < 4)
+            return someArray;
+
+          let values, q1, q3, iqr, maxValue, minValue;
+
+          values = someArray.slice().sort( (a, b) => a - b);//copy array fast and sort
+
+          if((values.length / 4) % 1 === 0){//find quartiles
+            q1 = 1/2 * (values[(values.length / 4)] + values[(values.length / 4) + 1]);
+            q3 = 1/2 * (values[(values.length * (3 / 4))] + values[(values.length * (3 / 4)) + 1]);
+          } else {
+            q1 = values[Math.floor(values.length / 4 + 1)];
+            q3 = values[Math.ceil(values.length * (3 / 4) + 1)];
+          }
+
+          iqr = q3 - q1;
+          maxValue = q3 + iqr * 1.5;
+          minValue = q1 - iqr * 1.5;
+
+          return [maxValue, minValue];
+       }
 
       var hoveredStateId = null;
 
-      let json_data = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/indexes_censal.json'));
+      let json_data = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json'));
 
       // set mapbox event listeners to update Vue component data
       vm.map.on('load', function () {
         // Add a source for the state polygons.
         vm.map.addSource('ZonasCensales', {
           'type': 'geojson',
-          'data': 'https://raw.githubusercontent.com/cmaro2/cross-kic/master/indexes_censal.json',
+          'data': 'https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json',
           'generateId': true
         });
 
-        let NDVIvals = json_data.features.map(f => f.properties.NDVI);
-        let minNDVI = Math.min(...NDVIvals);
-        let maxNDVI = Math.max(...NDVIvals);
+        //let NDVIvals = json_data.features.map(f => f.properties.NDVI);
+        //let minNDVI = Math.min(...NDVIvals);
+        //let maxNDVI = Math.max(...NDVIvals);
+        //let rangeNDVI = maxNDVI-minNDVI;
+
 
         vm.map.addLayer({
           'id': 'SC_NDVI',
@@ -83,7 +109,12 @@ export default {
             'fill-color':
                 ['case',
                   ['!=', ['get', 'NDVI'], null],
-                  ['interpolate', ['linear'], ['get', 'NDVI'], minNDVI, 'rgba(222,235,247,1)', maxNDVI, 'rgba(49,130,189,1)'],
+                  ['step', ['get', 'NDVI'], 
+                  '#f7fcb9', 
+                  0.1, '#d9f0a3',
+                  0.2, '#78c679',
+                  0.3, '#41ab5d',
+                  0.4, '#238443'],
                   'rgba(255, 255, 255, 0)'],
             'fill-outline-color':
                 ['case',
@@ -95,8 +126,11 @@ export default {
         }, 'waterway-label');
 
         let GSIvals = json_data.features.map(f => f.properties.GSIndex);
-        let minGSI = Math.min(...GSIvals);
-        let maxGSI = Math.max(...GSIvals);
+        let GSIs = filterOutliers(GSIvals);
+        let maxGSI = GSIs[0];
+        let minGSI = GSIs[1];
+        let rangeGSI = maxGSI - minGSI;
+
 
         vm.map.addLayer({
           'id': 'SC_GSI',
@@ -109,7 +143,14 @@ export default {
             'fill-color':
                 ['case',
                   ['!=', ['get', 'GSIndex'], null],
-                  ['interpolate', ['linear'], ['get', 'GSIndex'], minGSI, 'rgba(222,235,247,1)', maxGSI, 'rgba(49,130,189,1)'],
+                  ['step', ['get', 'GSIndex'],
+                  '#ffffe5', 
+                  minGSI, '#f7fcb9', 
+                  minGSI+(rangeGSI*0.2), '#d9f0a3',
+                  minGSI+(rangeGSI*0.4), '#78c679',
+                  minGSI+(rangeGSI*0.6), '#41ab5d',
+                  minGSI+(rangeGSI*0.8), '#238443',
+                  maxGSI, '#005a32'],
                   'rgba(255, 255, 255, 0)'],
             'fill-outline-color':
                 ['case',
@@ -121,8 +162,10 @@ export default {
         }, 'waterway-label');
 
         let GSDvals = json_data.features.map(f => f.properties.GSDensity);
-        let minGSD = Math.min(...GSDvals);
-        let maxGSD = Math.max(...GSDvals);
+        let GSDs = filterOutliers(GSDvals);
+        let maxGSD = GSDs[0];
+        let minGSD = GSDs[1];
+        let rangeGSD = maxGSD - minGSD;
 
         vm.map.addLayer({
           'id': 'SC_GSD',
@@ -135,7 +178,14 @@ export default {
             'fill-color':
                 ['case',
                   ['!=', ['get', 'GSDensity'], null],
-                  ['interpolate', ['linear'], ['get', 'GSDensity'], minGSD, 'rgba(222,235,247,1)', maxGSD, 'rgba(49,130,189,1)'],
+                  ['step', ['get', 'GSDensity'], 
+                  '#ffffe5', 
+                  minGSD, '#f7fcb9', 
+                  minGSD+(rangeGSD*0.2), '#d9f0a3',
+                  minGSD+(rangeGSD*0.4), '#78c679',
+                  minGSD+(rangeGSD*0.6), '#41ab5d',
+                  minGSD+(rangeGSD*0.8), '#238443',
+                  maxGSD, '#005a32'],
                   'rgba(255, 255, 255, 0)'],
             'fill-outline-color':
                 ['case',
@@ -147,8 +197,10 @@ export default {
         }, 'waterway-label');
 
         let GSBSvals = json_data.features.map(f => f.properties.GSBSRatio);
-        let minGSBS = Math.min(...GSBSvals);
-        let maxGSBS = Math.max(...GSBSvals);
+        let GSBSs = filterOutliers(GSBSvals);
+        let maxGSBS = GSBSs[0];
+        let minGSBS = GSBSs[1];
+        let rangeGSBS = maxGSBS - minGSBS;
 
         vm.map.addLayer({
           'id': 'SC_GSBS',
@@ -161,7 +213,14 @@ export default {
             'fill-color':
                 ['case',
                   ['!=', ['get', 'GSBSRatio'], null],
-                  ['interpolate', ['linear'], ['get', 'GSBSRatio'], minGSBS, 'rgba(222,235,247,1)', maxGSBS, 'rgba(49,130,189,1)'],
+                  ['step', ['get', 'GSBSRatio'], 
+                  '#ffffe5', 
+                  minGSBS, '#f7fcb9', 
+                  minGSBS+(rangeGSBS*0.2), '#d9f0a3',
+                  minGSBS+(rangeGSBS*0.4), '#78c679',
+                  minGSBS+(rangeGSBS*0.6), '#41ab5d',
+                  minGSBS+(rangeGSBS*0.8), '#238443',
+                  maxGSBS, '#005a32'],
                   'rgba(255, 255, 255, 0)'],
             'fill-outline-color':
                 ['case',
@@ -173,8 +232,10 @@ export default {
         }, 'waterway-label');
 
         let PIvals = json_data.features.map(f => f.properties.prox_avg);
-        let minPI = Math.min(...PIvals);
-        let maxPI = Math.max(...PIvals);
+        let PIs = filterOutliers(PIvals);
+        let maxPI = PIs[0];
+        let minPI = PIs[1];
+        let rangePI = maxPI - minPI;
 
         vm.map.addLayer({
           'id': 'SC_PI',
@@ -187,7 +248,14 @@ export default {
             'fill-color':
                 ['case',
                   ['!=', ['get', 'prox_avg'], null],
-                  ['interpolate', ['linear'], ['get', 'prox_avg'], minPI, 'rgba(222,235,247,1)', maxPI, 'rgba(49,130,189,1)'],
+                  ['step', ['get', 'prox_avg'], 
+                  '#ffffe5', 
+                  minPI, '#f7fcb9', 
+                  minPI+(rangePI*0.2), '#d9f0a3',
+                  minPI+(rangePI*0.4), '#78c679',
+                  minPI+(rangePI*0.6), '#41ab5d',
+                  minPI+(rangePI*0.8), '#238443',
+                  maxPI, '#005a32'],
                   'rgba(255, 255, 255, 0)'],
             'fill-outline-color':
                 ['case',
