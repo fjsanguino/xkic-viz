@@ -40,32 +40,37 @@
 
       <el-menu-item-group title="Green Space">
         <el-radio-group v-model="checkboxGroupInd">
+
           <el-menu-item index="1-1">
-            <el-radio class='radio-group-menu' label="SC_NDVI" name="SC_NDVI" @input="manageSelector()">
+            <el-radio class='radio-group-menu' label="SC_NDVI" name="SC_NDVI" @change="manageSelector()">
               NDVI
             </el-radio>
           </el-menu-item>
 
           <el-menu-item index="1-2">
-            <el-radio class='radio-group-menu' label="SC_GSI" name="SC_GSI" @input="manageSelector()">
+            <el-radio class='radio-group-menu' label="SC_GSI" name="SC_GSI" @change="manageSelector()">
               Green Space Index
             </el-radio>
           </el-menu-item>
+
           <el-menu-item index="1-3">
-            <el-radio class='radio-group-menu' label="SC_GSD" name="SC_GSD" @input="manageSelector()">
+            <el-radio class='radio-group-menu' label="SC_GSD" name="SC_GSD" @change="manageSelector()">
               Green Space Density
             </el-radio>
           </el-menu-item>
+
           <el-menu-item index="1-4">
             <el-radio class='radio-group-menu' label="SC_GSBS" name="SC_GSBS" @change="manageSelector()">
               GS Built-Space Ratio
             </el-radio>
           </el-menu-item>
+
           <el-menu-item index="1-5">
             <el-radio class='radio-group-menu' label="SC_PI" name="SC_PI" @change="manageSelector()">
               GS Proximity Index
             </el-radio>
           </el-menu-item>
+
         </el-radio-group>
       </el-menu-item-group>
 
