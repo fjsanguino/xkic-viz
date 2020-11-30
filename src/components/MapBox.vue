@@ -5,6 +5,83 @@
 <script>
 import mapboxgl from "mapbox-gl";
 
+function Get(yourUrl) {
+    var Httpreq = new XMLHttpRequest(); // a new request
+    Httpreq.open("GET", yourUrl, false);
+    Httpreq.send(null);
+    return Httpreq.responseText;
+}
+
+function filterOutliers(someArray) {
+    if(someArray.length < 4)
+    return someArray;
+
+    let values, q1, q3, iqr, maxValue, minValue;
+
+    values = someArray.slice().sort( (a, b) => a - b);//copy array fast and sort
+
+    if((values.length / 4) % 1 === 0){//find quartiles
+    q1 = 1/2 * (values[(values.length / 4)] + values[(values.length / 4) + 1]);
+    q3 = 1/2 * (values[(values.length * (3 / 4))] + values[(values.length * (3 / 4)) + 1]);
+    } else {
+    q1 = values[Math.floor(values.length / 4 + 1)];
+    q3 = values[Math.ceil(values.length * (3 / 4) + 1)];
+    }
+
+    iqr = q3 - q1;
+    maxValue = q3 + iqr * 1.5;
+    minValue = q1 - iqr * 1.5;
+
+    return [maxValue, minValue];
+}
+
+function addLegend(layers){
+    document.getElementById("legend").innerHTML = ''
+    var colors = ['#ffffe5','#f7fcb9','#d9f0a3','#78c679','#41ab5d','#238443','#005a32'];
+    var i;
+    for (i = 0; i < layers.length; i++) {
+      var layer = layers[i];
+      var color = colors[i];
+      var item = document.createElement('div');
+      var key = document.createElement('span');
+      key.className = 'legend-key';
+      key.style.backgroundColor = color;
+
+      var value = document.createElement('span');
+      value.innerHTML = layer;
+      item.appendChild(key);
+      item.appendChild(value);
+      document.getElementById("legend").appendChild(item);
+    }    
+}
+        
+
+let json_data = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json'));
+
+let GSIvals = json_data.features.map(f => f.properties.GSIndex);
+let GSIs = filterOutliers(GSIvals);
+let maxGSI = GSIs[0];
+let minGSI = GSIs[1];
+let rangeGSI = maxGSI - minGSI;
+
+let GSDvals = json_data.features.map(f => f.properties.GSDensity);
+let GSDs = filterOutliers(GSDvals);
+let maxGSD = GSDs[0];
+let minGSD = GSDs[1];
+let rangeGSD = maxGSD - minGSD;
+
+let GSBSvals = json_data.features.map(f => f.properties.GSBSRatio);
+let GSBSs = filterOutliers(GSBSvals);
+let maxGSBS = GSBSs[0];
+let minGSBS = GSBSs[1];
+let rangeGSBS = maxGSBS - minGSBS;
+
+let PIvals = json_data.features.map(f => f.properties.prox_avg);
+let PIs = filterOutliers(PIvals);
+let maxPI = PIs[0];
+let minPI = PIs[1];
+let rangePI = maxPI - minPI;
+
 export default {
   name: "MapboxMap",
   data() {
@@ -21,7 +98,7 @@ export default {
   mounted() {
     // create the map after the component is mounted
     this.createMap();
-
+    let layer = ['<0', '0-0.1','0.1-0.2','0.2-0.3','0.3-0.4','0.4-0.5','>0.5']
     this.$root.$on('change_layer', (layer_id) => {
 
       this.map.setLayoutProperty('SC_NDVI', 'visibility', 'none');
@@ -29,8 +106,52 @@ export default {
       this.map.setLayoutProperty('SC_GSD', 'visibility', 'none');
       this.map.setLayoutProperty('SC_GSBS', 'visibility', 'none');
       this.map.setLayoutProperty('SC_PI', 'visibility', 'none');
+      if(layer_id == 'SC_NDVI'){
+        layer = ['<0', '0-0.1','0.1-0.2','0.2-0.3','0.3-0.4','0.4-0.5','>0.5']
+      }
+      
+      if(layer_id == 'SC_GSI'){
+        layer = ['<'.concat(minGSI.toFixed(2).toString()), 
+        minGSI.toFixed(2).toString().concat('-',(minGSI+(rangeGSI*0.2)).toFixed(2).toString()),
+        (minGSI+(rangeGSI*0.2)).toFixed(2).toString().concat('-',(minGSI+(rangeGSI*0.4)).toFixed(2).toString()),
+        (minGSI+(rangeGSI*0.4)).toFixed(2).toString().concat('-',(minGSI+(rangeGSI*0.6)).toFixed(2).toString()),
+        (minGSI+(rangeGSI*0.6)).toFixed(2).toString().concat('-',(minGSI+(rangeGSI*0.8)).toFixed(2).toString()),
+        (minGSI+(rangeGSI*0.8)).toFixed(2).toString().concat('-',maxGSI.toFixed(2).toString()),
+        '>'.concat(maxGSI.toFixed(2).toString())]
+      }
+      
+      if(layer_id == 'SC_GSD'){
+        layer = ['<'.concat(minGSD.toFixed(2).toString()), 
+        minGSD.toFixed(2).toString().concat('-',(minGSD+(rangeGSD*0.2)).toFixed(2).toString()),
+        (minGSD+(rangeGSD*0.2)).toFixed(2).toString().concat('-',(minGSD+(rangeGSD*0.4)).toFixed(2).toString()),
+        (minGSD+(rangeGSD*0.4)).toFixed(2).toString().concat('-',(minGSD+(rangeGSD*0.6)).toFixed(2).toString()),
+        (minGSD+(rangeGSD*0.6)).toFixed(2).toString().concat('-',(minGSD+(rangeGSD*0.8)).toFixed(2).toString()),
+        (minGSD+(rangeGSD*0.8)).toFixed(2).toString().concat('-',maxGSD.toFixed(2).toString()),
+        '>'.concat(maxGSD.toFixed(2).toString())]
+      }
+      
+      if(layer_id == 'SC_GSBS'){
+        layer = ['<'.concat(minGSBS.toFixed(2).toString()), 
+        minGSBS.toFixed(2).toString().concat('-',(minGSBS+(rangeGSBS*0.2)).toFixed(2).toString()),
+        (minGSBS+(rangeGSBS*0.2)).toFixed(2).toString().concat('-',(minGSBS+(rangeGSBS*0.4)).toFixed(2).toString()),
+        (minGSBS+(rangeGSBS*0.4)).toFixed(2).toString().concat('-',(minGSBS+(rangeGSBS*0.6)).toFixed(2).toString()),
+        (minGSBS+(rangeGSBS*0.6)).toFixed(2).toString().concat('-',(minGSBS+(rangeGSBS*0.8)).toFixed(2).toString()),
+        (minGSBS+(rangeGSBS*0.8)).toFixed(2).toString().concat('-',maxGSBS.toFixed(2).toString()),
+        '>'.concat(maxGSBS.toFixed(2).toString())]
+      }
+      
+      if(layer_id == 'SC_PI'){
+        layer = ['<'.concat(minPI.toFixed(2).toString()), 
+        minPI.toFixed(2).toString().concat('-',(minPI+(rangePI*0.2)).toFixed(2).toString()),
+        (minPI+(rangePI*0.2)).toFixed(2).toString().concat('-',(minPI+(rangePI*0.4)).toFixed(2).toString()),
+        (minPI+(rangePI*0.4)).toFixed(2).toString().concat('-',(minPI+(rangePI*0.6)).toFixed(2).toString()),
+        (minPI+(rangePI*0.6)).toFixed(2).toString().concat('-',(minPI+(rangePI*0.8)).toFixed(2).toString()),
+        (minPI+(rangePI*0.8)).toFixed(2).toString().concat('-',maxPI.toFixed(2).toString()),
+        '>'.concat(maxPI.toFixed(2).toString())]
+      }
 
       this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
+      addLegend(layer)
     });
 
 
@@ -40,48 +161,18 @@ export default {
       var vm = this;
       // instantiate map.  this method runs once after the vue component is mounted to the dom
       mapboxgl.accessToken = 'pk.eyJ1IjoiY21hcm8yIiwiYSI6ImNrZ2h1dzBuYTI0bm8yeHFhZHM0NnNzaDYifQ.-PdPlyPaXojGvx_9acr2VA';
-
+      
+      let layer = ['<0', '0-0.1','0.1-0.2','0.2-0.3','0.3-0.4','0.4-0.5','>0.5']
+      addLegend(layer)
+      
       vm.map = new mapboxgl.Map({
         container: "map",
         style: 'mapbox://styles/mapbox/light-v10',
         center: this.center,
         zoom: this.zoom
       });
-
-      function Get(yourUrl) {
-        var Httpreq = new XMLHttpRequest(); // a new request
-        Httpreq.open("GET", yourUrl, false);
-        Httpreq.send(null);
-        return Httpreq.responseText;
-      }
       
-      function filterOutliers(someArray) {
-
-          if(someArray.length < 4)
-            return someArray;
-
-          let values, q1, q3, iqr, maxValue, minValue;
-
-          values = someArray.slice().sort( (a, b) => a - b);//copy array fast and sort
-
-          if((values.length / 4) % 1 === 0){//find quartiles
-            q1 = 1/2 * (values[(values.length / 4)] + values[(values.length / 4) + 1]);
-            q3 = 1/2 * (values[(values.length * (3 / 4))] + values[(values.length * (3 / 4)) + 1]);
-          } else {
-            q1 = values[Math.floor(values.length / 4 + 1)];
-            q3 = values[Math.ceil(values.length * (3 / 4) + 1)];
-          }
-
-          iqr = q3 - q1;
-          maxValue = q3 + iqr * 1.5;
-          minValue = q1 - iqr * 1.5;
-
-          return [maxValue, minValue];
-       }
-
       var hoveredStateId = null;
-
-      let json_data = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json'));
 
       // set mapbox event listeners to update Vue component data
       vm.map.on('load', function () {
@@ -110,11 +201,13 @@ export default {
                 ['case',
                   ['!=', ['get', 'NDVI'], null],
                   ['step', ['get', 'NDVI'], 
-                  '#f7fcb9', 
+                  '#ffffe5',
+                  0, '#f7fcb9', 
                   0.1, '#d9f0a3',
                   0.2, '#78c679',
                   0.3, '#41ab5d',
-                  0.4, '#238443'],
+                  0.4, '#238443',
+                  0.5, '#005a32'],
                   'rgba(255, 255, 255, 0)'],
             'fill-outline-color':
                 ['case',
@@ -124,13 +217,6 @@ export default {
             'fill-opacity': 0.6
           }
         }, 'waterway-label');
-
-        let GSIvals = json_data.features.map(f => f.properties.GSIndex);
-        let GSIs = filterOutliers(GSIvals);
-        let maxGSI = GSIs[0];
-        let minGSI = GSIs[1];
-        let rangeGSI = maxGSI - minGSI;
-
 
         vm.map.addLayer({
           'id': 'SC_GSI',
@@ -161,12 +247,6 @@ export default {
           }
         }, 'waterway-label');
 
-        let GSDvals = json_data.features.map(f => f.properties.GSDensity);
-        let GSDs = filterOutliers(GSDvals);
-        let maxGSD = GSDs[0];
-        let minGSD = GSDs[1];
-        let rangeGSD = maxGSD - minGSD;
-
         vm.map.addLayer({
           'id': 'SC_GSD',
           'type': 'fill',
@@ -196,12 +276,6 @@ export default {
           }
         }, 'waterway-label');
 
-        let GSBSvals = json_data.features.map(f => f.properties.GSBSRatio);
-        let GSBSs = filterOutliers(GSBSvals);
-        let maxGSBS = GSBSs[0];
-        let minGSBS = GSBSs[1];
-        let rangeGSBS = maxGSBS - minGSBS;
-
         vm.map.addLayer({
           'id': 'SC_GSBS',
           'type': 'fill',
@@ -230,12 +304,6 @@ export default {
             'fill-opacity': 0.6
           }
         }, 'waterway-label');
-
-        let PIvals = json_data.features.map(f => f.properties.prox_avg);
-        let PIs = filterOutliers(PIvals);
-        let maxPI = PIs[0];
-        let minPI = PIs[1];
-        let rangePI = maxPI - minPI;
 
         vm.map.addLayer({
           'id': 'SC_PI',
@@ -418,6 +486,41 @@ export default {
   background: #fff;
   padding: 10px;
   font-family: 'Open Sans', sans-serif;
+}
+
+ .map-overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.8);
+  margin-right: 20px;
+  font-family: Arial, sans-serif;
+  overflow: auto;
+  border-radius: 3px;
+}
+
+#features {
+  top: 0;
+  height: 100px;
+  margin-top: 20px;
+  width: 100px;
+}
+
+#legend {
+  padding: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  line-height: 18px;
+  height: 120px;
+  margin-bottom: 40px;
+  width: 150px;
+}
+
+.legend-key {
+  display: inline-block;
+  border-radius: 20%;
+  width: 15px;
+  height: 15px;
+  margin-right: 5px;
 }
 
 </style>

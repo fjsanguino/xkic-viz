@@ -11,6 +11,7 @@
         <el-main>
 
           <MapboxMap id="map"/>
+          <div class='map-overlay' id="legend"></div>
 
 
         </el-main>
