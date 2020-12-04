@@ -1,18 +1,40 @@
 <template>
   <div id="app">
     <el-container class="container">
-      <el-aside width="210px">
+      <el-aside width="250px">
         <Sidebar/>
       </el-aside>
 
       <el-container>
 
 
-        <el-main>
+        <el-main style="padding-right: 7px;" >
+          <el-row style="height:800px; margin-bottom: 10px">
+            <el-col :span="24">
+              <MapboxMap id="map" style="height: auto"/>
+              <div class='map-overlay' id="legend"></div>
+            </el-col>
+          </el-row>
 
-          <MapboxMap id="map"/>
-          <div class='map-overlay' id="legend"></div>
+          <el-row style="height: 520px">
+            <el-col :span="14">
 
+              <BarChartDistricts style="height: 400px"/>
+            </el-col>
+
+
+            <el-col :span="10" style="height: 320px">
+              <BoxPlot/>
+            </el-col>
+
+          </el-row>
+
+          <el-row>
+
+            <el-col>
+              <Details/>
+            </el-col>
+          </el-row>
 
         </el-main>
       </el-container>
@@ -25,6 +47,9 @@
 
 import Sidebar from "./components/Sidebar";
 import MapboxMap from "@/components/MapBox.vue";
+import BoxPlot from "@/components/Boxplot.vue";
+import BarChartDistricts from "@/components/BarChartDistricts";
+import Details from "@/components/Details";
 
 
 export default {
@@ -33,6 +58,9 @@ export default {
   components: {
     MapboxMap,
     Sidebar,
+    BoxPlot,
+    BarChartDistricts,
+    Details
   },
 };
 

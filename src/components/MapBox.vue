@@ -16,7 +16,7 @@ function filterOutliers(someArray) {
     if(someArray.length < 4)
     return someArray;
 
-    let values, q1, q3, iqr, maxValue, minValue;
+    let values, q1, q3, iqr, maxValue;
 
     values = someArray.slice().sort( (a, b) => a - b);//copy array fast and sort
 
@@ -30,14 +30,20 @@ function filterOutliers(someArray) {
 
     iqr = q3 - q1;
     maxValue = q3 + iqr * 1.5;
-    minValue = q1 - iqr * 1.5;
 
-    return [maxValue, minValue];
+    return [maxValue, 0];
 }
 
-function addLegend(layers){
+function addLegend(vals, colors){
+
+    var arrayLength = vals.length;
+    var layers = ['<'.concat(vals[0].toFixed(2).toString())]
+    for (var x = 1; x < arrayLength; x++) {
+        layers.push(vals[x-1].toFixed(2).toString().concat(' - ',vals[x].toFixed(2).toString()))
+    }
+    layers.push('>'.concat(vals[arrayLength-1].toFixed(2).toString()))
+    
     document.getElementById("legend").innerHTML = ''
-    var colors = ['#ffffe5','#f7fcb9','#d9f0a3','#78c679','#41ab5d','#238443','#005a32'];
     var i;
     for (i = 0; i < layers.length; i++) {
       var layer = layers[i];
@@ -82,6 +88,20 @@ let maxPI = PIs[0];
 let minPI = PIs[1];
 let rangePI = maxPI - minPI;
 
+let colorsNDVI = ['#d73027', '#fc8d59', '#fee08b', '#ffffbf', '#d9ef8b', '#91cf60', '#1a9850'];
+let colorsGSI = ['#ffffe5','#f7fcb9','#d9f0a3','#78c679','#41ab5d','#238443','#005a32'];
+let colorsGSD = ['#f9ddda','#f2b9c4','#e597b9','#ce78b3','#ad5fad','#834ba0','#573b88'];
+let colorsGSBS = ['#f1eef6','#d0d1e6','#a6bddb','#74a9cf','#3690c0','#0570b0','#034e7b'];
+let colorsPI = ['#ffffd4','#fee391','#fec44f','#fe9929','#ec7014','#cc4c02','#8c2d04'];
+
+let valsNDVI = [0.05,0.1,0.2,0.3,0.4,0.5];
+let valsGSI= [minGSI+(rangeGSI*0.1), minGSI+(rangeGSI*0.2),minGSI+(rangeGSI*0.4),minGSI+(rangeGSI*0.6),minGSI+(rangeGSI*0.8),maxGSI];
+let valsGSD= [minGSD+(rangeGSD*0.1), minGSD+(rangeGSD*0.2),minGSD+(rangeGSD*0.4),minGSD+(rangeGSD*0.6),minGSD+(rangeGSD*0.8),maxGSD];
+let valsGSBS= [minGSBS+(rangeGSBS*0.1), minGSBS+(rangeGSBS*0.2),minGSBS+(rangeGSBS*0.4),minGSBS+(rangeGSBS*0.6),minGSBS+(rangeGSBS*0.8),maxGSBS];
+let valsPI= [minPI+(rangePI*0.1), minPI+(rangePI*0.2),minPI+(rangePI*0.4),minPI+(rangePI*0.6),minPI+(rangePI*0.8),maxPI];
+
+
+
 export default {
   name: "MapboxMap",
   data() {
@@ -93,12 +113,15 @@ export default {
         type: Object,
         required: true
       },
+      indexLayers: ['SC_NDVI', 'SC_GSI', 'SC_GSD', 'SC_GSBS', 'SC_PI'],
+      agrupationLayers: ['SC_barrios', 'SC_distritos'],
+      fillAgrupationLayers: ['SC_barrios_fill', 'SC_distritos_fill']
     };
   },
   mounted() {
     // create the map after the component is mounted
     this.createMap();
-    let layer = ['<0', '0-0.1','0.1-0.2','0.2-0.3','0.3-0.4','0.4-0.5','>0.5']
+
     this.$root.$on('change_layer', (layer_id) => {
 
       this.map.setLayoutProperty('SC_NDVI', 'visibility', 'none');
@@ -106,52 +129,23 @@ export default {
       this.map.setLayoutProperty('SC_GSD', 'visibility', 'none');
       this.map.setLayoutProperty('SC_GSBS', 'visibility', 'none');
       this.map.setLayoutProperty('SC_PI', 'visibility', 'none');
-      if(layer_id == 'SC_NDVI'){
-        layer = ['<0', '0-0.1','0.1-0.2','0.2-0.3','0.3-0.4','0.4-0.5','>0.5']
-      }
       
-      if(layer_id == 'SC_GSI'){
-        layer = ['<'.concat(minGSI.toFixed(2).toString()), 
-        minGSI.toFixed(2).toString().concat('-',(minGSI+(rangeGSI*0.2)).toFixed(2).toString()),
-        (minGSI+(rangeGSI*0.2)).toFixed(2).toString().concat('-',(minGSI+(rangeGSI*0.4)).toFixed(2).toString()),
-        (minGSI+(rangeGSI*0.4)).toFixed(2).toString().concat('-',(minGSI+(rangeGSI*0.6)).toFixed(2).toString()),
-        (minGSI+(rangeGSI*0.6)).toFixed(2).toString().concat('-',(minGSI+(rangeGSI*0.8)).toFixed(2).toString()),
-        (minGSI+(rangeGSI*0.8)).toFixed(2).toString().concat('-',maxGSI.toFixed(2).toString()),
-        '>'.concat(maxGSI.toFixed(2).toString())]
-      }
-      
-      if(layer_id == 'SC_GSD'){
-        layer = ['<'.concat(minGSD.toFixed(2).toString()), 
-        minGSD.toFixed(2).toString().concat('-',(minGSD+(rangeGSD*0.2)).toFixed(2).toString()),
-        (minGSD+(rangeGSD*0.2)).toFixed(2).toString().concat('-',(minGSD+(rangeGSD*0.4)).toFixed(2).toString()),
-        (minGSD+(rangeGSD*0.4)).toFixed(2).toString().concat('-',(minGSD+(rangeGSD*0.6)).toFixed(2).toString()),
-        (minGSD+(rangeGSD*0.6)).toFixed(2).toString().concat('-',(minGSD+(rangeGSD*0.8)).toFixed(2).toString()),
-        (minGSD+(rangeGSD*0.8)).toFixed(2).toString().concat('-',maxGSD.toFixed(2).toString()),
-        '>'.concat(maxGSD.toFixed(2).toString())]
-      }
-      
-      if(layer_id == 'SC_GSBS'){
-        layer = ['<'.concat(minGSBS.toFixed(2).toString()), 
-        minGSBS.toFixed(2).toString().concat('-',(minGSBS+(rangeGSBS*0.2)).toFixed(2).toString()),
-        (minGSBS+(rangeGSBS*0.2)).toFixed(2).toString().concat('-',(minGSBS+(rangeGSBS*0.4)).toFixed(2).toString()),
-        (minGSBS+(rangeGSBS*0.4)).toFixed(2).toString().concat('-',(minGSBS+(rangeGSBS*0.6)).toFixed(2).toString()),
-        (minGSBS+(rangeGSBS*0.6)).toFixed(2).toString().concat('-',(minGSBS+(rangeGSBS*0.8)).toFixed(2).toString()),
-        (minGSBS+(rangeGSBS*0.8)).toFixed(2).toString().concat('-',maxGSBS.toFixed(2).toString()),
-        '>'.concat(maxGSBS.toFixed(2).toString())]
-      }
-      
-      if(layer_id == 'SC_PI'){
-        layer = ['<'.concat(minPI.toFixed(2).toString()), 
-        minPI.toFixed(2).toString().concat('-',(minPI+(rangePI*0.2)).toFixed(2).toString()),
-        (minPI+(rangePI*0.2)).toFixed(2).toString().concat('-',(minPI+(rangePI*0.4)).toFixed(2).toString()),
-        (minPI+(rangePI*0.4)).toFixed(2).toString().concat('-',(minPI+(rangePI*0.6)).toFixed(2).toString()),
-        (minPI+(rangePI*0.6)).toFixed(2).toString().concat('-',(minPI+(rangePI*0.8)).toFixed(2).toString()),
-        (minPI+(rangePI*0.8)).toFixed(2).toString().concat('-',maxPI.toFixed(2).toString()),
-        '>'.concat(maxPI.toFixed(2).toString())]
-      }
-
       this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
-      addLegend(layer)
+      
+      if(layer_id == 'SC_NDVI'){addLegend(valsNDVI, colorsNDVI)} 
+      else if(layer_id == 'SC_GSI'){addLegend(valsGSI, colorsGSI)}
+      else if(layer_id == 'SC_GSD'){addLegend(valsGSD, colorsGSD)}
+      else if(layer_id == 'SC_GSBS'){addLegend(valsGSBS, colorsGSBS)}
+      else if(layer_id == 'SC_PI'){addLegend(valsPI, colorsPI)}
+    });
+    this.$root.$on('change_layer_agrupation', (layer_id) => {
+
+      this.map.setLayoutProperty('SC_barrios', 'visibility', 'none');
+      this.map.setLayoutProperty('SC_distritos', 'visibility', 'none');
+
+      if (this.agrupationLayers.includes(layer_id)) {
+        this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
+      }
     });
 
 
@@ -162,8 +156,10 @@ export default {
       // instantiate map.  this method runs once after the vue component is mounted to the dom
       mapboxgl.accessToken = 'pk.eyJ1IjoiY21hcm8yIiwiYSI6ImNrZ2h1dzBuYTI0bm8yeHFhZHM0NnNzaDYifQ.-PdPlyPaXojGvx_9acr2VA';
       
-      let layer = ['<0', '0-0.1','0.1-0.2','0.2-0.3','0.3-0.4','0.4-0.5','>0.5']
-      addLegend(layer)
+      let layer = valsNDVI;
+      var colors = colorsNDVI;
+
+      addLegend(layer, colors)
       
       vm.map = new mapboxgl.Map({
         container: "map",
@@ -183,10 +179,15 @@ export default {
           'generateId': true
         });
 
-        //let NDVIvals = json_data.features.map(f => f.properties.NDVI);
-        //let minNDVI = Math.min(...NDVIvals);
-        //let maxNDVI = Math.max(...NDVIvals);
-        //let rangeNDVI = maxNDVI-minNDVI;
+        vm.map.addSource('Distritos', {
+          'type': 'geojson',
+          'data': 'https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesDistritos.json'
+        })
+
+        vm.map.addSource('Barrios', {
+          'type': 'geojson',
+          'data': 'https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesBarrios.json'
+        })
 
 
         vm.map.addLayer({
@@ -199,15 +200,15 @@ export default {
           'paint': {
             'fill-color':
                 ['case',
-                  ['!=', ['get', 'NDVI'], null],
-                  ['step', ['get', 'NDVI'], 
-                  '#ffffe5',
-                  0, '#f7fcb9', 
-                  0.1, '#d9f0a3',
-                  0.2, '#78c679',
-                  0.3, '#41ab5d',
-                  0.4, '#238443',
-                  0.5, '#005a32'],
+                  ['!=', ['get', 'NDVI'], null], 
+                  ['step', ['get', 'NDVI'],
+                  colorsNDVI[0],
+                  valsNDVI[0], colorsNDVI[1],
+                  valsNDVI[1], colorsNDVI[2],
+                  valsNDVI[2], colorsNDVI[3],
+                  valsNDVI[3], colorsNDVI[4],
+                  valsNDVI[4], colorsNDVI[5],
+                  valsNDVI[5], colorsNDVI[6]],
                   'rgba(255, 255, 255, 0)'],
             'fill-outline-color':
                 ['case',
@@ -230,13 +231,13 @@ export default {
                 ['case',
                   ['!=', ['get', 'GSIndex'], null],
                   ['step', ['get', 'GSIndex'],
-                  '#ffffe5', 
-                  minGSI, '#f7fcb9', 
-                  minGSI+(rangeGSI*0.2), '#d9f0a3',
-                  minGSI+(rangeGSI*0.4), '#78c679',
-                  minGSI+(rangeGSI*0.6), '#41ab5d',
-                  minGSI+(rangeGSI*0.8), '#238443',
-                  maxGSI, '#005a32'],
+                  colorsGSI[0],
+                  valsGSI[0], colorsGSI[1],
+                  valsGSI[1], colorsGSI[2],
+                  valsGSI[2], colorsGSI[3],
+                  valsGSI[3], colorsGSI[4],
+                  valsGSI[4], colorsGSI[5],
+                  valsGSI[5], colorsGSI[6]],
                   'rgba(255, 255, 255, 0)'],
             'fill-outline-color':
                 ['case',
@@ -258,14 +259,14 @@ export default {
             'fill-color':
                 ['case',
                   ['!=', ['get', 'GSDensity'], null],
-                  ['step', ['get', 'GSDensity'], 
-                  '#ffffe5', 
-                  minGSD, '#f7fcb9', 
-                  minGSD+(rangeGSD*0.2), '#d9f0a3',
-                  minGSD+(rangeGSD*0.4), '#78c679',
-                  minGSD+(rangeGSD*0.6), '#41ab5d',
-                  minGSD+(rangeGSD*0.8), '#238443',
-                  maxGSD, '#005a32'],
+                  ['step', ['get', 'GSDensity'],
+                  colorsGSD[0],
+                  valsGSD[0], colorsGSD[1],
+                  valsGSD[1], colorsGSD[2],
+                  valsGSD[2], colorsGSD[3],
+                  valsGSD[3], colorsGSD[4],
+                  valsGSD[4], colorsGSD[5],
+                  valsGSD[5], colorsGSD[6]],
                   'rgba(255, 255, 255, 0)'],
             'fill-outline-color':
                 ['case',
@@ -287,14 +288,14 @@ export default {
             'fill-color':
                 ['case',
                   ['!=', ['get', 'GSBSRatio'], null],
-                  ['step', ['get', 'GSBSRatio'], 
-                  '#ffffe5', 
-                  minGSBS, '#f7fcb9', 
-                  minGSBS+(rangeGSBS*0.2), '#d9f0a3',
-                  minGSBS+(rangeGSBS*0.4), '#78c679',
-                  minGSBS+(rangeGSBS*0.6), '#41ab5d',
-                  minGSBS+(rangeGSBS*0.8), '#238443',
-                  maxGSBS, '#005a32'],
+                  ['step', ['get', 'GSBSRatio'],
+                  colorsGSBS[0],
+                  valsGSBS[0], colorsGSBS[1],
+                  valsGSBS[1], colorsGSBS[2],
+                  valsGSBS[2], colorsGSBS[3],
+                  valsGSBS[3], colorsGSBS[4],
+                  valsGSBS[4], colorsGSBS[5],
+                  valsGSBS[5], colorsGSBS[6]],
                   'rgba(255, 255, 255, 0)'],
             'fill-outline-color':
                 ['case',
@@ -316,14 +317,14 @@ export default {
             'fill-color':
                 ['case',
                   ['!=', ['get', 'prox_avg'], null],
-                  ['step', ['get', 'prox_avg'], 
-                  '#ffffe5', 
-                  minPI, '#f7fcb9', 
-                  minPI+(rangePI*0.2), '#d9f0a3',
-                  minPI+(rangePI*0.4), '#78c679',
-                  minPI+(rangePI*0.6), '#41ab5d',
-                  minPI+(rangePI*0.8), '#238443',
-                  maxPI, '#005a32'],
+                  ['step', ['get', 'prox_avg'],
+                  colorsPI[0],
+                  valsPI[0], colorsPI[1],
+                  valsPI[1], colorsPI[2],
+                  valsPI[2], colorsPI[3],
+                  valsPI[3], colorsPI[4],
+                  valsPI[4], colorsPI[5],
+                  valsPI[5], colorsPI[6]],
                   'rgba(255, 255, 255, 0)'],
             'fill-outline-color':
                 ['case',
@@ -333,6 +334,54 @@ export default {
             'fill-opacity': 0.6
           }
         }, 'waterway-label');
+
+        vm.map.addLayer({
+          'id': 'SC_distritos',
+          'type': 'line',
+          'source': 'Distritos',
+          'layout': {
+            'visibility': 'none'
+          },
+          'paint': {
+            'line-opacity': 0.75,
+            'line-width': 2
+          }
+        });
+        vm.map.addLayer({
+          'id': 'SC_distritos_fill',
+          'type': 'fill',
+          'source': 'Distritos',
+          'layout': {
+            'visibility': 'visible'
+          },
+          'paint': {
+            'fill-opacity': 0,
+          }
+        });
+
+        vm.map.addLayer({
+          'id': 'SC_barrios',
+          'type': 'line',
+          'source': 'Barrios',
+          'layout': {
+            'visibility': 'none'
+          },
+          'paint': {
+            'line-opacity': 0.75,
+            'line-width': 1.25
+          }
+        });
+        vm.map.addLayer({
+          'id': 'SC_barrios_fill',
+          'type': 'fill',
+          'source': 'Barrios',
+          'layout': {
+            'visibility': 'visible'
+          },
+          'paint':{
+            'fill-opacity': 0
+          }
+        });
       });
 
       this.map.on('mousemove', function (e) {
@@ -345,42 +394,72 @@ export default {
                 {hover: false}
             );
           }
-          hoveredStateId = f[0].id;
-          vm.map.setFeatureState(
-              {source: 'ZonasCensales', id: hoveredStateId},
-              {hover: true}
-          );
+
+          for (var i = 0; i < f.length; i++) {
+            if (vm.indexLayers.includes(f[i].layer.id)) {
+              hoveredStateId = f[i].id;
+              vm.map.setFeatureState(
+                  {source: 'ZonasCensales', id: hoveredStateId},
+                  {hover: true}
+              );
+            }
+          }
         }
       });
 
       // location of the click, with description HTML from its properties.
       vm.map.on('click', function (e) {
         let f = vm.map.queryRenderedFeatures(e.point);
-        var str_index;
-        var val_index;
-        if (f[0].layer.id === 'SC_NDVI') {
-          str_index = 'NDVI';
-          val_index = f[0].properties.NDVI;
-        } else if (f[0].layer.id === 'SC_GSI') {
-          str_index = 'Green Space Index';
-          val_index = f[0].properties.GSIndex;
-        } else if (f[0].layer.id === 'SC_GSD') {
-          str_index = 'Green Space Density';
-          val_index = f[0].properties.GSDensity;
-        }else if (f[0].layer.id === 'SC_GSBS') {
-          str_index = 'Green Space vs Built Space Ratio';
-          val_index = f[0].properties.GSBSRatio;
-        }else if (f[0].layer.id === 'SC_PI') {
-          str_index = 'Proximity Index';
-          val_index = f[0].properties.prox_avg;
+        var i;
+
+        for (i = 0; i < f.length; i++) {
+          if (vm.fillAgrupationLayers.includes(f[i].layer.id)) {
+            if (f[i].layer.id === 'SC_barrios_fill') {
+              // eslint-disable-next-line no-unused-vars
+              var name_barrio = f[i].properties.Name;
+              // eslint-disable-next-line no-unused-vars
+              var code_barrio = f[i].properties.GEOCODIGO;
+            } else if (f[i].layer.id === 'SC_distritos_fill') {
+              // eslint-disable-next-line no-unused-vars
+              var name_distrito = f[i].properties.Name;
+              // eslint-disable-next-line no-unused-vars
+              var code_distrito = f[i].properties.CDIS;
+            }
+          }
         }
 
-        new mapboxgl.Popup()
-            .setLngLat(e.lngLat)
-            .setHTML('<strong> CUSEC: ' + f[0].properties.CUSEC + '</strong>' +
-                '<p>El ' + str_index + ' de la zona es ' + val_index.toFixed(2) + '</p>')
-            .addTo(vm.map);
+        for (i = 0; i < f.length; i++) {
+          if (vm.indexLayers.includes(f[i].layer.id)) {
+            var str_index;
+            var val_index;
+            if (f[i].layer.id === 'SC_NDVI') {
+              str_index = 'NDVI';
+              val_index = f[i].properties.NDVI;
+            } else if (f[i].layer.id === 'SC_GSI') {
+              str_index = 'Green Space Index';
+              val_index = f[i].properties.GSIndex;
+            } else if (f[i].layer.id === 'SC_GSD') {
+              str_index = 'Green Space Density';
+              val_index = f[i].properties.GSDensity;
+            } else if (f[i].layer.id === 'SC_GSBS') {
+              str_index = 'Green Space vs Built Space Ratio';
+              val_index = f[i].properties.GSBSRatio;
+            } else if (f[i].layer.id === 'SC_PI') {
+              str_index = 'Proximity Index';
+              val_index = f[i].properties.prox_avg;
+            }
+
+            new mapboxgl.Popup()
+                .setLngLat(e.lngLat)
+                .setHTML('<p><strong> Distrito ' + code_distrito + ': </strong>' + name_distrito + '</p>' +
+                    '<p><strong> Barrio ' + code_barrio + ': </strong>' + name_barrio + '</p>' +
+                    '<strong> CUSEC: ' + f[i].properties.CUSEC + '</strong>' +
+                    '<p>El ' + str_index + ' de la zona es ' + val_index.toFixed(2) + '</p>')
+                .addTo(vm.map);
+          }
+        }
       });
+
 
       // Change the cursor to a pointer when the mouse is over the states layer.
       vm.map.on('mouseenter', 'SC_NDVI', function () {
@@ -510,7 +589,7 @@ export default {
   padding: 10px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   line-height: 18px;
-  height: 120px;
+  height: 140px;
   margin-bottom: 40px;
   width: 150px;
 }
