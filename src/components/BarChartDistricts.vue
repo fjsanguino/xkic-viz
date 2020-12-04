@@ -131,7 +131,7 @@ export default {
         },
         options: {
           title: {
-            display: true,
+            display: false,
             text: ind_label + ' per District'
           }
         }

@@ -167,7 +167,7 @@
       </el-menu-item-group>
 
     </el-submenu>
-
+<!--
     <el-menu-item index="4">
       <el-select v-model="distritosSelector" placeholder="Select" @change="manageSelecDist()">
         <el-option
@@ -180,7 +180,7 @@
         </el-option>
       </el-select>
     </el-menu-item>
-
+-->
     <!--
     <el-menu-item index="3">
       <i class="el-icon-s-data"></i> <span>Data</span>
@@ -203,6 +203,7 @@
 export default {
   data() {
     return {
+      /*
       options: [
         {
           value: '01',
@@ -294,6 +295,7 @@ export default {
 
       ],
       distritosSelector: '',
+       */
       checkboxGroupInd: 'SC_NDVI',
       checkboxGroupIndAgrupacion: 'none'
     }
@@ -307,9 +309,12 @@ export default {
       console.log('hey')
       this.$root.$emit('change_layer_agrupation', (this.checkboxGroupIndAgrupacion));
     },
+    /*
     manageSelecDist(){
       this.$root.$emit('change_selector', (this.distritosSelector));
     }
+
+     */
 
   }
 };

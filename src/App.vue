@@ -8,7 +8,7 @@
       <el-container>
 
 
-        <el-main style="padding-right: 7px;" >
+        <el-main style="padding-right: 7px;">
           <el-row style="height:800px; margin-bottom: 10px">
             <el-col :span="24">
               <MapboxMap id="map" style="height: auto"/>
@@ -23,11 +23,19 @@
             </el-col>
 
 
+          </el-row>
+          <el-row style="height: 520px">
             <el-col :span="10" style="height: 320px">
               <BoxPlot/>
             </el-col>
 
+            <el-col :span="10">
+              <RadarChart/>
+            </el-col>
+
+
           </el-row>
+
 
           <el-row>
 
@@ -50,6 +58,7 @@ import MapboxMap from "@/components/MapBox.vue";
 import BoxPlot from "@/components/Boxplot.vue";
 import BarChartDistricts from "@/components/BarChartDistricts";
 import Details from "@/components/Details";
+import RadarChart from "@/components/RadarChart";
 
 
 export default {
@@ -60,7 +69,8 @@ export default {
     Sidebar,
     BoxPlot,
     BarChartDistricts,
-    Details
+    Details,
+    RadarChart
   },
 };
 
