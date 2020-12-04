@@ -20,24 +20,54 @@ export default {
     };
   },
   mounted() {
-    this.fillData('01');
-    /*
-    this.$root.$on('change_selector', (cod_dis) => {
-      console.log('recibido', cod_dis)
-      this.fillData(cod_dis);
+    this.fillData('NDVI');
 
-    });
+    this.$root.$on('change_layer', (ind) => {
+      console.log('recibido en boxplot', ind)
 
-     */
-    this.$root.$on('change_selector', (cod_dis) => {
-      console.log('recibido en boxplot', cod_dis)
-      this.fillData(cod_dis)
+      var ind_cod_JSON = this.getIndCodJSON(ind)
+      this.fillData(ind_cod_JSON)
+
 
     })
   },
   methods: {
+    getIndCodJSON(ind) {
+      var ind_cod_JSON = ''
 
-    fillData(cod_dis) {
+      if (ind == 'SC_NDVI') {
+        ind_cod_JSON = 'NDVI'
+
+      } else if (ind == 'SC_GSI') {
+        ind_cod_JSON = "GSIndex"
+      } else if (ind == 'SC_GSD') {
+        ind_cod_JSON = "GSDensity"
+      } else if (ind == 'SC_GSBS') {
+        ind_cod_JSON = "GSBSRatio"
+      } else if (ind == 'SC_PI') {
+        ind_cod_JSON = "prox_avg"
+      }
+      return ind_cod_JSON
+
+    },
+
+    getIndLabel(ind){
+      var ind_label = ''
+      if (ind == 'NDVI') {
+        ind_label = 'NDVI'
+      } else if (ind == 'GSIndex') {
+        ind_label = "Green Space Index"
+      } else if (ind == 'GSDensity') {
+        ind_label = "Green Space Density"
+      } else if (ind == 'GSBSRatio') {
+        ind_label = "Green Space/Built Space SRatio"
+      } else if (ind == 'prox_avg') {
+        ind_label = "Green Space Proximity Index"
+      }
+      return ind_label
+    },
+
+    fillData(ind) {
       //Geojson file
       function Get(yourUrl) {
         var Httpreq = new XMLHttpRequest(); // a new request
@@ -48,80 +78,71 @@ export default {
 
       let json_data = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json'));
 
+      console.log(json_data.features)
+      var indicator = ind
 
-      //para la etiqueta
-      var dict_distritos = {
-        1: 'Centro',
-        2: 'Arganzuela',
-        3: 'Retiro',
-        4: 'Salamanca',
-        5: 'Chamartín',
-        6: 'Tetuán',
-        7: 'Chamberi',
-        8: 'Fuencarral-El Pardo',
-        9: 'Moncloa-Aravaca',
-        10: 'Latina',
-        11: 'Carabanchel',
-        12: 'Usera',
-        13: 'Puente de Vallecas',
-        14: 'Moratalaz',
-        15: 'Ciudad Lineal',
-        16: 'Hortaleza',
-        17: 'Villaverde',
-        18: 'Villa de Vallecas',
-        19: 'Vicálvaro',
-        20: 'San-Blas Canillejas',
-        21: 'Barajas'
+      var arr_districts_names = ['Centro',
+        'Arganzuela',
+        'Retiro',
+        'Salamanca',
+        'Chamartín',
+        'Tetuán',
+        'Chamberi',
+        'Fuencarral-El Pardo',
+        'Moncloa-Aravaca',
+        'Latina',
+        'Carabanchel',
+        'Usera',
+        'Puente de Vallecas',
+        'Moratalaz',
+        'Ciudad Lineal',
+        'Hortaleza',
+        'Villaverde',
+        'Villa de Vallecas',
+        'Vicálvaro',
+        'San-Blas Canillejas',
+        'Barajas']
+
+      var arr_districts_cods = [
+          '01' ,
+        '02' ,
+        '03' ,
+        '04' ,
+        '05' ,
+        '06' ,
+        '07' ,
+        '08' ,
+        '09' ,
+        '10' ,
+        '11' ,
+        '12' ,
+        '13' ,
+        '14' ,
+        '15' ,
+        '16' ,
+        '17' ,
+        '18' ,
+        '19' ,
+        '20' ,
+        '21' ]
+
+
+      var data_array_districts = []
+
+      for (const cod in arr_districts_cods) {
+
+        var json_filt_cod = json_data.features.filter(function (el) {
+          return el.properties.CDIS == arr_districts_cods[cod]; // Changed this so a home would match
+        });
+
+        var data_dis = json_filt_cod.map(function (e) {
+          return e.properties[indicator];
+        })
+        data_array_districts.push(data_dis)
+
       }
 
-
-      var label_district = dict_distritos[parseInt(cod_dis)]
-
-
-      //We filter base on the district code obtaining another json object from 'features'
-      //Possible to change from filter
-
-      //Future change from filters
-      var indicator = 'NDVI'
-      //comes from the selector
-      var CDIS = cod_dis
-
-      var json_filt_CDIS = json_data.features.filter(function (el) {
-        return el.properties.CDIS == CDIS; // Changed this so a home would match
-      });
-
-      //var indicators = ['NDVI', 'Green Space Index', 'Green Space Density', 'Green Space/Built Space Ratio', 'Green Space Proximity Index']
-
-
-      //For data we get the value of the indicator
-      var data_f = [json_filt_CDIS.map(function (e) {
-        return e.properties[indicator];
-      })]
-      /*
-      var data_f_NDVI = [json_filt_CDIS.map(function (e) {
-        return e.properties['NDVI'];
-      })]
-      var data_f_GSIndex = [json_filt_CDIS.map(function (e) {
-        return e.properties["GSIndex"];
-      })]
-      var data_f_GSDensity = [json_filt_CDIS.map(function (e) {
-        return e.properties["GSDensity"];
-      })]
-      var data_f_GSBS = [json_filt_CDIS.map(function (e) {
-        return e.properties['GSBSRatio'];
-      })]
-      var data_f_prox = [json_filt_CDIS.map(function (e) {
-        return e.properties['prox_avg'];
-      })]
-
-      console.log([data_f])
-      console.log([data_f_NDVI])
-      console.log([data_f_GSIndex])
-      console.log([data_f_GSDensity])
-      console.log([data_f_GSBS])
-      console.log([data_f_prox])
-
-       */
+      var ind_label = this.getIndLabel(ind)
 
 
       this.chartOptions = {
@@ -137,12 +158,12 @@ export default {
       };
 
       this.datacollection = {
-        labels: [label_district],
+        labels: arr_districts_names,
         datasets: [
           {
-            label: indicator,
+            label: ind_label,
             backgroundColor: "#f87979",
-            data: data_f
+            data: data_array_districts
           },
 
 
@@ -163,7 +184,7 @@ export default {
 <style>
 .small {
   height: 300px;
-  max-width: 600px;
+  max-width: 800px;
   /*margin: 150px auto;*/
 }
 </style>
