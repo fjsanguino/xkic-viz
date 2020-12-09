@@ -107,7 +107,8 @@ export default {
   data() {
     // Set initial data, this.createMap() configures event listeners that update data based on user interaction
     return {
-      center: [-3.7, 40.4], // St. Paul
+      //,
+      center: [-3.7, 40.465], // St. Paul
       zoom: 10,
       map: {
         type: Object,
@@ -131,12 +132,28 @@ export default {
       this.map.setLayoutProperty('SC_PI', 'visibility', 'none');
       
       this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
-      
-      if(layer_id == 'SC_NDVI'){addLegend(valsNDVI, colorsNDVI)} 
-      else if(layer_id == 'SC_GSI'){addLegend(valsGSI, colorsGSI)}
-      else if(layer_id == 'SC_GSD'){addLegend(valsGSD, colorsGSD)}
-      else if(layer_id == 'SC_GSBS'){addLegend(valsGSBS, colorsGSBS)}
-      else if(layer_id == 'SC_PI'){addLegend(valsPI, colorsPI)}
+
+
+      if(layer_id == 'SC_NDVI'){
+        addLegend(valsNDVI, colorsNDVI)
+        this.$root.$emit('change_layer_map', {'vals': valsNDVI, 'colors':colorsNDVI, 'ind':'SC_NDVI'});
+      }
+      else if(layer_id == 'SC_GSI'){
+        addLegend(valsGSI, colorsGSI)
+        this.$root.$emit('change_layer_map', {'vals': valsGSI, 'colors':colorsGSI, 'ind':'SC_GSI'});
+      }
+      else if(layer_id == 'SC_GSD'){
+        addLegend(valsGSD, colorsGSD)
+        this.$root.$emit('change_layer_map', {'vals': valsGSD, 'colors':colorsGSD, 'ind':'SC_GSD'});
+      }
+      else if(layer_id == 'SC_GSBS'){
+        addLegend(valsGSBS, colorsGSBS)
+        this.$root.$emit('change_layer_map', {'vals': valsGSBS, 'colors':colorsGSBS, 'ind':'SC_GSBS'});
+      }
+      else if(layer_id == 'SC_PI'){
+        addLegend(valsPI, colorsPI)
+        this.$root.$emit('change_layer_map', {'vals': valsPI, 'colors':colorsPI, 'ind':'SC_PI' });
+      }
     });
     this.$root.$on('change_layer_agrupation', (layer_id) => {
 

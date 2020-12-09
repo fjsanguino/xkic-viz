@@ -1,19 +1,23 @@
 <template>
   <el-card class="box-card">
-    <canvas id="barchartdistricts"></canvas>
+    <canvas id="barchart"></canvas>
   </el-card>
 </template>
 
 <script>
-import chart from 'chart.js';
+import chart from "chart.js";
 
 export default {
-
   mounted() {
     // create the chart after the component is mounted
     //Start with NDVI
     var myBarChart = this.createChart('NDVI')
-    //RECIBIR INDICADOR
+
+    this.$root.$on('change_layer_agrupation', (layer_id) => {
+
+      console.log(layer_id)
+    });
+
     this.$root.$on('change_layer', (ind) => {
 
       var ind_cod_JSON = this.getIndCodJSON(ind)
@@ -32,35 +36,26 @@ export default {
           borderColor: '#7eaed1',
           borderWidth: 1
         }]
+      };
+      myBarChart.options = {
+        title: {
+          display: true,
+          text: dataLabels[2] + ' by Districts',
+          fontSize: 14
+        },
+        legend :{
+          display: false
+        }
       }
       myBarChart.update()
 
     });
+
+
   },
 
+
   methods: {
-
-    getIndCodJSON(ind) {
-      var ind_cod_JSON = ''
-
-      if (ind == 'SC_NDVI') {
-        ind_cod_JSON = 'NDVI'
-
-      } else if (ind == 'SC_GSI') {
-        ind_cod_JSON = "GSIndex"
-      } else if (ind == 'SC_GSD') {
-        ind_cod_JSON = "GSDensity"
-      } else if (ind == 'SC_GSBS') {
-        ind_cod_JSON = "GSBSRatio"
-      } else if (ind == 'SC_PI') {
-        ind_cod_JSON = "prox_avg"
-      }
-
-      return ind_cod_JSON
-
-    },
-
-
     getDataLabels(ind) {
 
       function Get(yourUrl) {
@@ -70,20 +65,8 @@ export default {
         return Httpreq.responseText;
       }
 
-
-      var ind_label = ''
-      if (ind == 'prox_avg') {
-        ind_label = 'Green Space Proximity Index'
-      } else if (ind == 'NDVI') {
-        ind_label = 'NDVI'
-      } else if (ind == 'GSIndex') {
-        ind_label = 'Green Space Index'
-      } else if (ind == 'GSDensity') {
-        ind_label = 'Green Space Density'
-      } else if (ind == 'GSBSRatio') {
-        ind_label = 'Green Space/Built Space Ratio'
-      }
-
+      //call the function to get the indicator label cleaned
+      var ind_label = this.getIndLabelTitle(ind)
 
       let json_data_districts = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesDistritos.json'));
 
@@ -103,40 +86,77 @@ export default {
       return returned
 
     },
+    getIndCodJSON(ind) {
+      var ind_cod_JSON = ''
+
+      if (ind == 'SC_NDVI') {
+        ind_cod_JSON = 'NDVI'
+      } else if (ind == 'SC_GSI') {
+        ind_cod_JSON = "GSIndex"
+      } else if (ind == 'SC_GSD') {
+        ind_cod_JSON = "GSDensity"
+      } else if (ind == 'SC_GSBS') {
+        ind_cod_JSON = "GSBSRatio"
+      } else if (ind == 'SC_PI') {
+        ind_cod_JSON = "prox_avg"
+      }
+
+      return ind_cod_JSON
+
+    },
+
+    //Get the official name of ind for the title
+    getIndLabelTitle(ind) {
+      var ind_label = ''
+      if (ind == 'prox_avg' || ind == 'SC_PI') {
+        ind_label = 'Green Space Proximity Index'
+      } else if (ind == 'NDVI' || ind == 'SC_NDVI') {
+        ind_label = 'NDVI'
+      } else if (ind == 'GSIndex' || ind == 'SC_GSI') {
+        ind_label = 'Green Space Index'
+      } else if (ind == 'GSDensity' || ind == 'SC_GSD') {
+        ind_label = 'Green Space Density'
+      } else if (ind == 'GSBSRatio' || ind == 'SC_GSBS') {
+        ind_label = 'Green Space/Built Space Ratio'
+      }
+      return ind_label
+    },
+
     createChart(ind) {
-      var ctx = document.getElementById('barchartdistricts').getContext('2d');
+
+      var ctx = document.getElementById('barchart').getContext('2d');
+
+      //Call the function to filter the data
       var dataLabels = this.getDataLabels(ind)
+
 
       var data_districts = dataLabels[0]
       var labels_districts = dataLabels[1]
       var ind_label = dataLabels[2]
-
-      //Call the function to filter the data
-
 
       var myBarChart = new chart(ctx, {
         type: 'bar',
         data: {
           labels: labels_districts,
           datasets: [{
-            label: ind_label, //titulo,
+            label: 'Count of ' + ind_label, //titulo,
             data: data_districts,
             fill: true, //
             backgroundColor: '#bbd4e5',
             borderColor: '#7eaed1',
             borderWidth: 1
-
           }]
-
         },
         options: {
+          legend:{
+            display: false
+          } ,
           title: {
-            display: false,
-            text: ind_label + ' per District'
+            display: true,
+            text: ind_label + ' by Districts',
+            fontSize: 14
           }
         }
-
-
       })
 
       myBarChart.update()

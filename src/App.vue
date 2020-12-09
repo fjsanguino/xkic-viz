@@ -8,29 +8,29 @@
       <el-container>
 
 
-        <el-main style="padding-right: 7px;">
-          <el-row style="height:800px; margin-bottom: 10px">
+        <el-main style="padding-right: 10px;">
+          <el-row style="height:600px; margin-bottom: 10px">
             <el-col :span="24">
               <MapboxMap id="map" style="height: auto"/>
               <div class='map-overlay' id="legend"></div>
             </el-col>
           </el-row>
 
-          <el-row style="height: 520px">
+          <el-row style="margin-bottom: 10px">
             <el-col :span="14">
 
-              <BarChartDistricts style="height: 400px"/>
+              <BarChartHist style="height: auto"/>
             </el-col>
 
 
           </el-row>
-          <el-row style="height: 520px">
-            <el-col :span="10" style="height: 320px">
+          <el-row style="height: 550px">
+            <el-col :span="11" style="height: auto">
               <BoxPlot/>
             </el-col>
 
-            <el-col :span="10">
-              <RadarChart/>
+            <el-col :span="13" style="height: auto">
+              <BarChartDistBarr/>
             </el-col>
 
 
@@ -56,9 +56,9 @@
 import Sidebar from "./components/Sidebar";
 import MapboxMap from "@/components/MapBox.vue";
 import BoxPlot from "@/components/Boxplot.vue";
-import BarChartDistricts from "@/components/BarChartDistricts";
+import BarChartHist from "@/components/BarChartHistogram";
 import Details from "@/components/Details";
-import RadarChart from "@/components/RadarChart";
+import BarChartDistBarr from "@/components/BarChartDistBarr";
 
 
 export default {
@@ -68,9 +68,9 @@ export default {
     MapboxMap,
     Sidebar,
     BoxPlot,
-    BarChartDistricts,
+    BarChartHist,
     Details,
-    RadarChart
+    BarChartDistBarr
   },
 };
 

@@ -56,13 +56,13 @@ export default {
       if (ind == 'NDVI') {
         ind_label = 'NDVI'
       } else if (ind == 'GSIndex') {
-        ind_label = "Green Space Index"
+        ind_label = "GS Index"
       } else if (ind == 'GSDensity') {
-        ind_label = "Green Space Density"
+        ind_label = "GS Density"
       } else if (ind == 'GSBSRatio') {
-        ind_label = "Green Space/Built Space SRatio"
+        ind_label = "GS/Built Space SRatio"
       } else if (ind == 'prox_avg') {
-        ind_label = "Green Space Proximity Index"
+        ind_label = "GS Proximity Index"
       }
       return ind_label
     },
@@ -78,7 +78,7 @@ export default {
 
       let json_data = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json'));
 
-      console.log(json_data.features)
+      //console.log(json_data.features)
       var indicator = ind
 
       var arr_districts_names = ['Centro',
@@ -149,10 +149,11 @@ export default {
         responsive: true,
         legend: {
           position: 'top',
+          display: false
         },
         title: {
-          display: false,
-          text: 'Chart.js Box Plot Chart'
+          display: true,
+          text: ind_label + ' BoxPlot by Districts'
         },
         tooltipDecimals: 3
       };

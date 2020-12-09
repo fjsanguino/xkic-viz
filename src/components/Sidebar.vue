@@ -1,8 +1,7 @@
 <template>
   <el-menu
       default-active="3"
-      @open="handleOpen"
-      @close="handleClose"
+
       mode="vertical"
       background-color="#304156"
       text-color="#bfcbd9"
@@ -17,7 +16,7 @@
     <el-submenu index="1">
       <template slot="title">
         <i class="el-icon-location"></i>
-        <span>Agrupación</span>
+        <span>Layers</span>
       </template>
 
 
@@ -34,7 +33,7 @@
     <el-submenu index="2">
       <template slot="title">
         <i class="el-icon-location"></i>
-        <span>Layers</span>
+        <span>Indicators</span>
       </template>
 
 
