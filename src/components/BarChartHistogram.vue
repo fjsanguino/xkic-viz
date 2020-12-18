@@ -1,39 +1,51 @@
 <template>
   <el-card class="box-card">
     <canvas id="barcharthistogram"></canvas>
+    <!--
+    canvas with the id of the chart (specify in the script part) in the method createChart()
+    called when the component is first mounted in the mounted() function
+     -->
   </el-card>
 </template>
 
 <script>
 import chart from 'chart.js';
 
+/*Constant values for the colos and the limits of the histogram for the NDVI indicator.
+For the rest of the indices they are sent from the Mapbox.vue component
+ */
 let colorsNDVI = ['#d73027', '#fc8d59', '#fee08b', '#ffffbf', '#d9ef8b', '#91cf60', '#1a9850'];
+
 let valsNDVI = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5];
 
 export default {
 
   mounted() {
-    // create the chart after the component is mounted
-    //Start with NDVI
+    //After the component is mounted, the chart is created (starting with NDVI) and saved in a var called myBarChart for future updates
     var myBarChart = this.createChart('NDVI')
 
-    //RECIBIR INDICADOR
+    //Receive the indicator (index) from the Mapbox as a dict with the intervals values, the colors and the indicator
     this.$root.$on('change_layer_map', (received) => {
       var intervals = received['vals']
       var colors = received['colors']
       var ind = received['ind']
 
-      //Return of the function count_intervals, colors, intervals and the ind_lbel
+      /*
+      Call the function calculateHistogramData with the intervals values and the indicator and return the data
+      and the ind_label for the chart
+      */
       var result_hist = this.calculateHistogramData(intervals, ind)
-
       var data_hist = result_hist[0]
       var ind_label = result_hist[1]
+
+      //Call the function to create the labels of intervals for each bar of histogram
       var labels_int = this.buildIntervalsLabels(intervals)
 
+      //Update the chart with the new data and values
       myBarChart.data = {
         labels: labels_int,
         datasets: [{
-          label: 'Count of ' + ind_label, //titulo,
+          label: 'Count of ' + ind_label, //text for the onhover,
           data: data_hist,
           fill: true, //
           backgroundColor: colors,
@@ -65,7 +77,7 @@ export default {
 
     calculateHistogramData(intervals, ind) {
 
-      //Get the data from indexes censal and filter the data by the indicator
+      //Get the data from indexes censal and filter it by the indicator
       function Get(yourUrl) {
         var Httpreq = new XMLHttpRequest(); // a new request
         Httpreq.open("GET", yourUrl, false);
@@ -74,8 +86,8 @@ export default {
       }
 
       let json_data_censal = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json'));
-      var indicator = this.getIndCodJSON(ind);
-      var ind_label = this.getIndLabelTitle(ind);
+      var indicator = this.getIndCodJSON(ind); //function to get the indicator as its in the GEOJSON
+      var ind_label = this.getIndLabelTitle(ind); //function to get the proper name of the indicator
 
       var json_cens_filt = json_data_censal.features
       var data_censal = json_cens_filt.map(function (e) {
@@ -104,7 +116,7 @@ export default {
         }
       }
 
-      //Return of the function count_intervals, colors, intervals and the ind_lbel
+      //Return of the function count_intervals and ind_lbel
       return [counts_intervals, ind_label]
     },
 
@@ -144,40 +156,6 @@ export default {
       }
       return ind_label
     },
-
-    // Get the data and labels for Districts
-    getDataLabels(ind) {
-
-      function Get(yourUrl) {
-        var Httpreq = new XMLHttpRequest(); // a new request
-        Httpreq.open("GET", yourUrl, false);
-        Httpreq.send(null);
-        return Httpreq.responseText;
-      }
-
-      //call the function to get the indicator label cleaned
-      var ind_label = this.getIndLabelTitle(ind)
-
-
-      let json_data_districts = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesDistritos.json'));
-
-      var json_dist_filt = json_data_districts.features
-
-      var labels_districts = json_dist_filt.map(function (e) {
-        return e.properties.Name
-      })
-
-      var data_districts = json_dist_filt.map(function (e) {
-        return e.properties[ind]
-      })
-
-
-      var returned = [data_districts, labels_districts, ind_label]
-
-      return returned
-
-    },
-
     buildIntervalsLabels(intervals) {
 
       var labelsIntervals = []
@@ -197,27 +175,13 @@ export default {
     createChart(ind) {
 
       console.log(ind)
+      //Call the function to filter the data and calculate the histogram values based on the limits (valsNDVI)
       var result_hist = this.calculateHistogramData(valsNDVI, 'SC_NDVI')
       var data = result_hist[0]
       var ind_label_hist = result_hist[1]
-      //Return of the function count_intervals, colors, intervals and the ind_lbel
+
+      //Create the chart id
       var ctx = document.getElementById('barcharthistogram').getContext('2d');
-
-      /*
-      var dataLabels = this.getDataLabels(ind)
-
-      var data_districts = dataLabels[0]
-      var labels_districts = dataLabels[1]
-      var ind_label = dataLabels[2]
-
-      console.log('data_districts', data_districts)
-      console.log('labels_districts', labels_districts)
-      console.log('ind_label', ind_label)
-
-       */
-
-      //Call the function to filter the data
-
 
       var labels = this.buildIntervalsLabels(valsNDVI)
 

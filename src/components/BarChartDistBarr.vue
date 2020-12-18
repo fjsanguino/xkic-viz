@@ -1,6 +1,10 @@
 <template>
   <el-card class="box-card">
     <canvas id="barchart"></canvas>
+    <!--
+    canvas with the id of the chart (specify in the script part) in the method createChart()
+    called when the component is first mounted in the mounted() function
+    -->
   </el-card>
 </template>
 
@@ -9,8 +13,7 @@ import chart from "chart.js";
 
 export default {
   mounted() {
-    // create the chart after the component is mounted
-    //Start with NDVI
+    //After the component is mounted, the chart is created (starting with NDVI) and saved in a var called myBarChart for future updates
     var myBarChart = this.createChart('NDVI')
 
     this.$root.$on('change_layer_agrupation', (layer_id) => {
@@ -18,13 +21,14 @@ export default {
       console.log(layer_id)
     });
 
+    //Receive the value from change_layer event (indicator) from the Sidebar
     this.$root.$on('change_layer', (ind) => {
 
+      //get the indicator as its in the GEOJSON to filter the data with the dataLabels function
       var ind_cod_JSON = this.getIndCodJSON(ind)
-
-      //Recalcular en función del cambio de indicador
+      //Call the functions to get the data and labels for each district based on the indicator coming from the sidebar menu
       var dataLabels = this.getDataLabels(ind_cod_JSON)
-      //Actualizar
+      //Update the chart
       myBarChart.data = {
         labels: dataLabels[1],
         datasets: [{
@@ -40,10 +44,10 @@ export default {
       myBarChart.options = {
         title: {
           display: true,
-          text: dataLabels[2] + ' by Districts',
+          text: dataLabels[2] + ' value by Districts (calculated for each one)',
           fontSize: 14
         },
-        legend :{
+        legend: {
           display: false
         }
       }
@@ -56,7 +60,13 @@ export default {
 
 
   methods: {
+
+    /*
+    Function that get the data from the url (geoJSON from github) of the indices calculated for the districts
+    using the indicator to filter it
+     */
     getDataLabels(ind) {
+
 
       function Get(yourUrl) {
         var Httpreq = new XMLHttpRequest(); // a new request
@@ -80,12 +90,14 @@ export default {
         return e.properties[ind]
       })
 
-
+      //Return the data array the districts and the label for the indicator name
       var returned = [data_districts, labels_districts, ind_label]
 
       return returned
 
     },
+
+    //Base on the indicator name from sidebar component get the label as in the indexes.json
     getIndCodJSON(ind) {
       var ind_cod_JSON = ''
 
@@ -124,22 +136,23 @@ export default {
 
     createChart(ind) {
 
+      //Create the chart id
       var ctx = document.getElementById('barchart').getContext('2d');
 
-      //Call the function to filter the data
+      //Call the function to obtain the data
       var dataLabels = this.getDataLabels(ind)
-
 
       var data_districts = dataLabels[0]
       var labels_districts = dataLabels[1]
       var ind_label = dataLabels[2]
 
+      //create the chart with the corresponding values
       var myBarChart = new chart(ctx, {
         type: 'bar',
         data: {
           labels: labels_districts,
           datasets: [{
-            label: 'Count of ' + ind_label, //titulo,
+            label: 'Count of ' + ind_label, //text for the onhover,
             data: data_districts,
             fill: true, //
             backgroundColor: '#bbd4e5',
@@ -148,12 +161,12 @@ export default {
           }]
         },
         options: {
-          legend:{
+          legend: {
             display: false
-          } ,
+          },
           title: {
             display: true,
-            text: ind_label + ' by Districts',
+            text: ind_label + ' value calculated by Districts',
             fontSize: 14
           }
         }

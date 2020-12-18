@@ -7,24 +7,28 @@
 </template>
 
 <script>
+//import of the javascript code for the boxplot chart that uses 2 specific libraries (one for the boxplot and another to connect chartjs with vue components)
 import BoxPlotChart from "./BoxPlotChart.js";
 
 export default {
   components: {
     BoxPlotChart
   },
+  //data and chartoptions to be sent to the js file
   data() {
     return {
       datacollection: null,
       chartOptions: null
     };
   },
+  //After the component is mounted, fillData function is called to create the chart (starting with NDVI)
   mounted() {
     this.fillData('NDVI');
 
     this.$root.$on('change_layer', (ind) => {
-      console.log('recibido en boxplot', ind)
 
+      //when change_layer event happens (from the sidebar the indicator changes)
+      //fillData() is called with the ind as its in the JSON files to update the chart
       var ind_cod_JSON = this.getIndCodJSON(ind)
       this.fillData(ind_cod_JSON)
 
@@ -32,6 +36,7 @@ export default {
     })
   },
   methods: {
+    //Base on the indicator name from mapbox component get the label as in the indexes.json
     getIndCodJSON(ind) {
       var ind_cod_JSON = ''
 
@@ -51,7 +56,8 @@ export default {
 
     },
 
-    getIndLabel(ind){
+    //Get the official name of ind for the title
+    getIndLabel(ind) {
       var ind_label = ''
       if (ind == 'NDVI') {
         ind_label = 'NDVI'
@@ -68,7 +74,7 @@ export default {
     },
 
     fillData(ind) {
-      //Geojson file
+      //Get the GEOJSON file of the indexes
       function Get(yourUrl) {
         var Httpreq = new XMLHttpRequest(); // a new request
         Httpreq.open("GET", yourUrl, false);
@@ -78,10 +84,10 @@ export default {
 
       let json_data = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json'));
 
-      //console.log(json_data.features)
       var indicator = ind
 
-      var arr_districts_names = ['Centro',
+      //Creation of 2 arrays (districts_names and codes) to use for the labels and filtering the data
+      let arr_districts_names = ['Centro',
         'Arganzuela',
         'Retiro',
         'Salamanca',
@@ -102,49 +108,45 @@ export default {
         'Vicálvaro',
         'San-Blas Canillejas',
         'Barajas']
+      let arr_districts_cods = [
+        '01',
+        '02',
+        '03',
+        '04',
+        '05',
+        '06',
+        '07',
+        '08',
+        '09',
+        '10',
+        '11',
+        '12',
+        '13',
+        '14',
+        '15',
+        '16',
+        '17',
+        '18',
+        '19',
+        '20',
+        '21']
 
-      var arr_districts_cods = [
-          '01' ,
-        '02' ,
-        '03' ,
-        '04' ,
-        '05' ,
-        '06' ,
-        '07' ,
-        '08' ,
-        '09' ,
-        '10' ,
-        '11' ,
-        '12' ,
-        '13' ,
-        '14' ,
-        '15' ,
-        '16' ,
-        '17' ,
-        '18' ,
-        '19' ,
-        '20' ,
-        '21' ]
-
-
+      //Iterate the 21 district codes and to filter the data and push it to a new array (according to each district)
       var data_array_districts = []
-
       for (const cod in arr_districts_cods) {
-
+        //filter by cod (district) and by indicator
         var json_filt_cod = json_data.features.filter(function (el) {
-          return el.properties.CDIS == arr_districts_cods[cod]; // Changed this so a home would match
+          return el.properties.CDIS == arr_districts_cods[cod];
         });
-
         var data_dis = json_filt_cod.map(function (e) {
           return e.properties[indicator];
         })
         data_array_districts.push(data_dis)
 
       }
-
       var ind_label = this.getIndLabel(ind)
 
-
+      //Add the data and options to the chart
       this.chartOptions = {
         responsive: true,
         legend: {
@@ -166,20 +168,11 @@ export default {
             backgroundColor: "#f87979",
             data: data_array_districts
           },
-
-
-
         ]
       };
-
-
     }
   }
-  ,
-
-
-}
-;
+};
 </script>
 
 <style>

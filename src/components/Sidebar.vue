@@ -9,9 +9,9 @@
       style="height:100%; border: 0px"
   >
     <!--
-    <el-menu-item index="1">
-      <i class="el-icon-menu"></i> <span>Dashboard</span>
-    </el-menu-item>
+    Use of the components and class from element-ui to build the sidebar (el-submenu) and the icons from their gallery
+    el-menu-item-group allows to have a group of items and a same defined function to manage the input of the group and
+    to share info between components
     -->
     <el-submenu index="1">
       <template slot="title">
@@ -19,12 +19,16 @@
         <span>Layers</span>
       </template>
 
+      <!--
+      for the this first group of layers when the input change, it calls the manageAgrupation function with the
+      checkboxGroupIndAgrupacion value (label value for each of them SC_barrios, SC_distritos and none)
 
+      -->
       <el-menu-item-group>
         <el-radio-group v-model="checkboxGroupIndAgrupacion" @input=manageAgrupation()>
           <el-radio-button class='radio-group-menu' label="SC_barrios">Barrio</el-radio-button>
           <el-radio-button class='radio-group-menu' label="SC_distritos">Distrito</el-radio-button>
-          <el-radio-button class='radio-group-menu' label="none">Nada</el-radio-button>
+          <el-radio-button class='radio-group-menu' label="none">None</el-radio-button>
         </el-radio-group>
       </el-menu-item-group>
     </el-submenu>
@@ -36,6 +40,11 @@
         <span>Indicators</span>
       </template>
 
+      <!--
+      for the this group of indicators when the input change, it calls the manageSelector function with the
+      checkboxGroupInd value (label value for each of them SC_NDVI, SC_GSI,SC_GSD, SC_GSBS, SC_PI)
+      -->
+
 
       <el-menu-item-group title="Green Space">
         <el-radio-group v-model="checkboxGroupInd">
@@ -44,6 +53,9 @@
                       style="margin-right: 112px;">
               NDVI
             </el-radio>
+            <!-- popover to see a short definition of the index (use of components of element ui -> el-popover
+            repeated for all the indexes
+            -->
             <el-popover trigger="click"
                         placement="top"
                         width="400"
@@ -166,32 +178,6 @@
       </el-menu-item-group>
 
     </el-submenu>
-<!--
-    <el-menu-item index="4">
-      <el-select v-model="distritosSelector" placeholder="Select" @change="manageSelecDist()">
-        <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-            :name = "item.value"
-        >
-        </el-option>
-      </el-select>
-    </el-menu-item>
--->
-    <!--
-    <el-menu-item index="3">
-      <i class="el-icon-s-data"></i> <span>Data</span>
-    </el-menu-item>
-    <el-menu-item index="4">
-      <i class="el-icon-data-analysis"></i> <span>Charts</span>
-    </el-menu-item>
-    <el-menu-item index="5">
-      <i class="el-icon-message"></i> <span>Contact</span>
-    </el-menu-item>
-    -->
-
 
   </el-menu>
 
@@ -202,104 +188,18 @@
 export default {
   data() {
     return {
-      /*
-      options: [
-        {
-          value: '01',
-          label: 'Centro',
-        },
-        {
-          value: '02',
-          label: 'Arganzuela',
-        },
-        {
-          value: '03',
-          label: 'Retiro',
-        },
-        {
-          value: '04',
-          label: 'Salamanca',
-        },
-        {
-          value: '05',
-          label: 'Chamartín',
-        },
-        {
-          value: '06',
-          label: 'Tetuán',
-        },
-        {
-          value: '07',
-          label: 'Chamberi',
-        },
-        {
-          value: '08',
-          label: 'Fuencarral-El Pardo',
-        },
-        {
-          value: '09',
-          label: 'Moncloa-Aravaca',
-        },
-        {
-          value: '10',
-          label: 'Latina',
-        },
-        {
-          value: '11',
-          label: 'Carabanchel',
-        },
-        {
-          value: '12',
-          label: 'Usera',
-        },
 
-        {
-          value: '13',
-          label: 'Puente de Vallecas',
-        },
-        {
-          value: '14',
-          label: 'Moratalaz',
-        },
-        {
-          value: '15',
-          label: 'Ciudad Lineal',
-        },
-        {
-          value: '16',
-          label: 'Hortaleza',
-        },
-        {
-          value: '17',
-          label: 'Villaverde',
-        },
-        {
-          value: '18',
-          label: 'Villa de Vallecas',
-        },
-        {
-          value: '19',
-          label: 'Vicálvaro',
-        },
-        {
-          value: '20',
-          label: 'San-Blas Canillejas',
-        },
-        {
-          value: '21',
-          label: 'Barajas',
-        }
-
-
-
-      ],
-      distritosSelector: '',
-       */
       checkboxGroupInd: 'SC_NDVI',
       checkboxGroupIndAgrupacion: 'none'
     }
   },
   methods: {
+
+    /*Functions executed when the values from the menu are changed
+      Use of this.$root.$emit with a name event and a send of the parameter
+      In the specific components (MapBox.vue, BarChartDistBarr, BarChartHistogram) there is a event listener part to
+      check for these events
+    */
 
     manageSelector() {
       this.$root.$emit('change_layer', (this.checkboxGroupInd));
@@ -308,15 +208,8 @@ export default {
       console.log('hey')
       this.$root.$emit('change_layer_agrupation', (this.checkboxGroupIndAgrupacion));
     },
-    /*
-    manageSelecDist(){
-      this.$root.$emit('change_selector', (this.distritosSelector));
-    }
-
-     */
-
   }
-};
+}
 </script>
 
 <style scoped>

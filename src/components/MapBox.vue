@@ -468,10 +468,10 @@ export default {
 
             new mapboxgl.Popup()
                 .setLngLat(e.lngLat)
-                .setHTML('<p><strong> Distrito ' + code_distrito + ': </strong>' + name_distrito + '</p>' +
+                .setHTML('<p><strong> District ' + code_distrito + ': </strong>' + name_distrito + '</p>' +
                     '<p><strong> Barrio ' + code_barrio + ': </strong>' + name_barrio + '</p>' +
                     '<strong> CUSEC: ' + f[i].properties.CUSEC + '</strong>' +
-                    '<p>El ' + str_index + ' de la zona es ' + val_index.toFixed(2) + '</p>')
+                    '<p>The ' + str_index + ' of the area (censal) is: ' + val_index.toFixed(2) + '</p>')
                 .addTo(vm.map);
           }
         }
