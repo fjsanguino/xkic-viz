@@ -13,6 +13,8 @@ export default {
             default: null
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             type: Object,
             default: null
         },

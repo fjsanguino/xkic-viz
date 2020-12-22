@@ -34,7 +34,7 @@ function filterOutliers(someArray) {
     return [maxValue, 0];
 }
 
-function addLegend(vals, colors){
+function addLegend(vals, colors, title){
 
     var arrayLength = vals.length;
     var layers = ['<'.concat(vals[0].toFixed(2).toString())]
@@ -44,6 +44,16 @@ function addLegend(vals, colors){
     layers.push('>'.concat(vals[arrayLength-1].toFixed(2).toString()))
     
     document.getElementById("legend").innerHTML = ''
+    var ley_title = document.createElement('div');
+    var value_title = document.createElement('span');
+    value_title.innerHTML = title;
+    var line_title = document.createElement('span');
+    line_title.innerHTML = '<hr>';
+    //ley_title.style.backgroundColor='#E8E8E8';
+    ley_title.appendChild(value_title);
+    ley_title.appendChild(line_title);
+    document.getElementById("legend").appendChild(ley_title);
+
     var i;
     for (i = 0; i < layers.length; i++) {
       var layer = layers[i];
@@ -135,23 +145,23 @@ export default {
 
 
       if(layer_id == 'SC_NDVI'){
-        addLegend(valsNDVI, colorsNDVI)
+        addLegend(valsNDVI, colorsNDVI, 'NDVI')
         this.$root.$emit('change_layer_map', {'vals': valsNDVI, 'colors':colorsNDVI, 'ind':'SC_NDVI'});
       }
       else if(layer_id == 'SC_GSI'){
-        addLegend(valsGSI, colorsGSI)
+        addLegend(valsGSI, colorsGSI, 'Green Space Index')
         this.$root.$emit('change_layer_map', {'vals': valsGSI, 'colors':colorsGSI, 'ind':'SC_GSI'});
       }
       else if(layer_id == 'SC_GSD'){
-        addLegend(valsGSD, colorsGSD)
+        addLegend(valsGSD, colorsGSD, 'Green Space Density')
         this.$root.$emit('change_layer_map', {'vals': valsGSD, 'colors':colorsGSD, 'ind':'SC_GSD'});
       }
       else if(layer_id == 'SC_GSBS'){
-        addLegend(valsGSBS, colorsGSBS)
+        addLegend(valsGSBS, colorsGSBS, 'Green Space-Build Space ratio')
         this.$root.$emit('change_layer_map', {'vals': valsGSBS, 'colors':colorsGSBS, 'ind':'SC_GSBS'});
       }
       else if(layer_id == 'SC_PI'){
-        addLegend(valsPI, colorsPI)
+        addLegend(valsPI, colorsPI, 'Proximity Index')
         this.$root.$emit('change_layer_map', {'vals': valsPI, 'colors':colorsPI, 'ind':'SC_PI' });
       }
     });
@@ -176,7 +186,7 @@ export default {
       let layer = valsNDVI;
       var colors = colorsNDVI;
 
-      addLegend(layer, colors)
+      addLegend(layer, colors, 'NDVI')
       
       vm.map = new mapboxgl.Map({
         container: "map",
@@ -468,10 +478,10 @@ export default {
 
             new mapboxgl.Popup()
                 .setLngLat(e.lngLat)
-                .setHTML('<p><strong> Distrito ' + code_distrito + ': </strong>' + name_distrito + '</p>' +
+                .setHTML('<p><strong> District ' + code_distrito + ': </strong>' + name_distrito + '</p>' +
                     '<p><strong> Barrio ' + code_barrio + ': </strong>' + name_barrio + '</p>' +
                     '<strong> CUSEC: ' + f[i].properties.CUSEC + '</strong>' +
-                    '<p>El ' + str_index + ' de la zona es ' + val_index.toFixed(2) + '</p>')
+                    '<p>The ' + str_index + ' of the area (censal) is: ' + val_index.toFixed(2) + '</p>')
                 .addTo(vm.map);
           }
         }
@@ -606,9 +616,10 @@ export default {
   padding: 10px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   line-height: 18px;
-  height: 140px;
+  height: auto;
   margin-bottom: 40px;
-  width: 150px;
+  width: auto;
+  opacity: 0.95;
 }
 
 .legend-key {
