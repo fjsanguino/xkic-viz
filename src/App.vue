@@ -10,6 +10,7 @@
 
       <el-container>
 
+
         <el-main style="padding-right: 10px;">
           <!-- Row for the map -->
           <el-row style="height:600px; margin-bottom: 10px">
@@ -20,9 +21,9 @@
           </el-row>
 
           <!-- Row for the Histogram -->
-          <el-row style="margin-bottom: 10px; height: 300px; display: flex;">
-            <el-col :span="18">
-              <BarChartHist style="height: 300px; width: 100%; display: flex;"/>
+          <el-row style="margin-bottom: 10px">
+            <el-col :span="14">
+              <BarChartHist style="height: auto"/>
             </el-col>
           </el-row>
 
@@ -32,13 +33,16 @@
               <BoxPlot style="height: 100%; width: auto; display: flex;"/>
             </el-col>
 
-            <el-col :span="12">
-              <BarChartDistBarr style="height: 100%; width: auto; display: flex;"/>
+            <el-col :span="13" style="height: auto">
+              <BarChartDistBarr/>
             </el-col>
+
+
           </el-row>
 
           <!-- Row for the Details behind indicators -->
           <el-row>
+
             <el-col>
               <Details/>
             </el-col>
@@ -81,6 +85,7 @@ import BoxPlot from "@/components/Boxplot.vue";
 import BarChartHist from "@/components/BarChartHistogram";
 import Details from "@/components/Details";
 import BarChartDistBarr from "@/components/BarChartDistBarr";
+
 //add that components to use in the template
 export default {
   name: "App",
@@ -102,15 +107,26 @@ body,
   height: 100%;
   margin: 0;
 }
+
 body {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
 #app {
   color: #2c3e50;
   height: 100%;
 }
+
+logos {
+  text-align: left;
+}
+img-thumbnail2 {
+  width: 4%;
+  height: auto;
+}
+
 logos {
   text-align: left;
 }
