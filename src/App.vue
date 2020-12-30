@@ -49,7 +49,12 @@
           </el-row>
 
           <el-footer style="margin-top: 8px">
+            <div>
+              <p style="font-family: Avenir, Helvetica, Arial, sans-serif;">
+                Any consultation regarding the use of indexes, the calculation of them or the visualizer can be addressed to  <a href="mailto:y.torres@upm.es">y.torres@upm.es</a>
+              </p>
 
+            </div>
             <div class="logos">
               <p style="font-family: Avenir, Helvetica, Arial, sans-serif;">
                 This work has been funded by a cross-KIC activity between EIT Digital and Climate KIC
