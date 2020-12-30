@@ -47,8 +47,6 @@
           (PROX = A / D<sup>2</sup> , where
           A: area of each patch [m<sup>2</sup>] and
           D: edge-to-edge distance from the patch to the nearest one within a search buffer (radius = 200 m) [m<sup>2</sup>])
-          <br> <br>
-          License: CC BY-NC-SA (adopted from Fragstats methodology)
         </div>
 
         <h4>Green Space Density</h4>
@@ -59,8 +57,6 @@
           <br> <br>
           Computation:<br>
           Spatial query to calculate the area occupied by the green spaces in each census tract divided by the area of the corresponding census tract.
-          <br> <br>
-          License: CC BY-NC-SA
         </div>
 
         <h4>Green-Space Built-Space Ratio</h4>
@@ -73,8 +69,6 @@
           <br> <br>
           Computation:<br>
           Spatial query to calculate the area occupied by the green spaces in each census tract divided by the area occupied by the buildings in the same census tract
-          <br> <br>
-          License: CC BY-NC-SA
         </div>
       </el-card>
     </el-col>

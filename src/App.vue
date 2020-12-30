@@ -51,7 +51,7 @@
           <el-footer style="margin-top: 8px">
             <div>
               <p style="font-family: Avenir, Helvetica, Arial, sans-serif;">
-                Any consultation regarding the use of indexes, the calculation of them or the visualizer can be addressed to  <a href="mailto:y.torres@upm.es">y.torres@upm.es</a>
+                Any consultation regarding the use of indexes, the calculation of them or the visualizer can be addressed to Yolanda Salvador Pérez (<a href="mailto:y.torres@upm.es">y.torres@upm.es</a>)
               </p>
 
             </div>
