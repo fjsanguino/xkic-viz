@@ -43,9 +43,10 @@
           Green spaces from the vector cartography 1/1000 provided by the City Council: urban garden, garden area, garden in patio (polygon features).
           Date 2016.
           <br> <br>
-          Computation:<br>
-          Spatial query to calculate the area occupied by the green spaces in each census tract, divided by the total number of inhabitants.
-
+          Computation:<br> Average of PROX index of every green space in the census tract
+          (PROX = A / D<sup>2</sup> , where
+          A: area of each patch [m<sup>2</sup>] and
+          D: edge-to-edge distance from the patch to the nearest one within a search buffer (radius = 200 m) [m<sup>2</sup>])
         </div>
 
         <h4>Green Space Density</h4>
