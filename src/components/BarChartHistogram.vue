@@ -10,7 +10,7 @@
 
 <script>
 import chart from 'chart.js';
-
+import json_data_censal from '../../assets/data/indexesCensal.json';
 /*Constant values for the colos and the limits of the histogram for the NDVI indicator.
 For the rest of the indices they are sent from the Mapbox.vue component
  */
@@ -80,14 +80,15 @@ export default {
     calculateHistogramData(intervals, ind) {
 
       //Get the data from indexes censal and filter it by the indicator
+      /*
       function Get(yourUrl) {
         var Httpreq = new XMLHttpRequest(); // a new request
         Httpreq.open("GET", yourUrl, false);
         Httpreq.send(null);
         return Httpreq.responseText;
       }
-
-      let json_data_censal = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json'));
+      */
+      //let json_data_censal = JSON.parse('../../assets/data/indexesCensal.json');
       var indicator = this.getIndCodJSON(ind); //function to get the indicator as its in the GEOJSON
       var ind_label = this.getIndLabelTitle(ind); //function to get the proper name of the indicator
 

@@ -10,6 +10,7 @@
 
 <script>
 import chart from "chart.js";
+import json_data_districts from '../../assets/data/indexesDistritos.json';
 
 export default {
   mounted() {
@@ -69,18 +70,18 @@ export default {
      */
     getDataLabels(ind) {
 
-
+      /*
       function Get(yourUrl) {
         var Httpreq = new XMLHttpRequest(); // a new request
         Httpreq.open("GET", yourUrl, false);
         Httpreq.send(null);
         return Httpreq.responseText;
       }
-
+      */
       //call the function to get the indicator label cleaned
       var ind_label = this.getIndLabelTitle(ind)
 
-      let json_data_districts = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesDistritos.json'));
+      //let json_data_districts = JSON.parse('../../assets/data/indexesDistritos.json');
 
       var json_dist_filt = json_data_districts.features
 

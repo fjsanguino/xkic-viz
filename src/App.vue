@@ -28,9 +28,9 @@
           </el-row>
 
           <!-- Row for the Boxplot and Barchart -->
-          <el-row style="margin-bottom: 10px; height: 430px; display: flex;">
-            <el-col :span="12">
-              <BoxPlot style="height: 100%; width: auto; display: flex;"/>
+          <el-row style="height: 550px">
+            <el-col :span="11" style="height: auto">
+              <BoxPlot/>
             </el-col>
 
             <el-col :span="13" style="height: auto">

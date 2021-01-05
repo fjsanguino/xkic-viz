@@ -4,14 +4,14 @@
 
 <script>
 import mapboxgl from "mapbox-gl";
-
+/*
 function Get(yourUrl) {
     var Httpreq = new XMLHttpRequest(); // a new request
     Httpreq.open("GET", yourUrl, false);
     Httpreq.send(null);
     return Httpreq.responseText;
 }
-
+*/
 function filterOutliers(someArray) {
     if(someArray.length < 4)
     return someArray;
@@ -71,8 +71,9 @@ function addLegend(vals, colors, title){
     }    
 }
         
-
-let json_data = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json'));
+import json_data from '../../assets/data/indexesCensal.json';
+import json_data_barrios from '../../assets/data/indexesBarrios.json';
+import json_data_distritos from '../../assets/data/indexesDistritos.json';
 
 let GSIvals = json_data.features.map(f => f.properties.GSIndex);
 let GSIs = filterOutliers(GSIvals);
@@ -202,18 +203,18 @@ export default {
         // Add a source for the state polygons.
         vm.map.addSource('ZonasCensales', {
           'type': 'geojson',
-          'data': 'https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json',
+          'data': json_data,
           'generateId': true
         });
 
         vm.map.addSource('Distritos', {
           'type': 'geojson',
-          'data': 'https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesDistritos.json'
+          'data': json_data_distritos
         })
 
         vm.map.addSource('Barrios', {
           'type': 'geojson',
-          'data': 'https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesBarrios.json'
+          'data': json_data_barrios
         })
 
 

@@ -7,6 +7,7 @@
 <script>
 //import of the javascript code for the boxplot chart that uses 2 specific libraries (one for the boxplot and another to connect chartjs with vue components)
 import BoxPlotChart from "./BoxPlotChart.js";
+import json_data from '../../assets/data/indexesCensal.json';
 
 export default {
   components: {
@@ -73,14 +74,14 @@ export default {
 
     fillData(ind) {
       //Get the GEOJSON file of the indexes
+      /*
       function Get(yourUrl) {
         var Httpreq = new XMLHttpRequest(); // a new request
         Httpreq.open("GET", yourUrl, false);
         Httpreq.send(null);
         return Httpreq.responseText;
       }
-
-      let json_data = JSON.parse(Get('https://raw.githubusercontent.com/cmaro2/cross-kic/master/JSON/indexesCensal.json'));
+      */
 
       var indicator = ind
 
